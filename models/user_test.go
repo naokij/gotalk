@@ -30,6 +30,26 @@ func TestPasswordVerify(t *testing.T) {
 	user.Insert()
 }
 
-func TestCodeVerify(t *testing.T) {
+func TestVerifyCode(t *testing.T) {
+	var user User
+	user.Username = "username"
+	err := user.Read("Username")
+	if err == nil {
+		t.Log("good")
+	} else {
+		t.Error("User Read Error!")
+	}
+	code := user.GenerateActivateCode()
+	if user.VerifyActivateCode(code) {
+		t.Log("ActivateCode Good!")
+	} else {
+		t.Error("ActivateCode Bad!")
+	}
+
+	if user.VerifyActivateCode(code + "fake") {
+		t.Error("Bad activate code should not pass verification!")
+	} else {
+		t.Log("Bad activate code failed, that's good!")
+	}
 
 }
