@@ -24,13 +24,27 @@ import (
 )
 
 var (
+	AppName        string
+	AppHost        string
+	AppUrl         string
+	AppLogo        string
+	SecretKey      string
 	MongodbSession *mgo.Session
 	MongodbName    string = "gotalk"
+)
+
+const (
+	AppVer = "VERSION 0.0.1"
 )
 
 func init() {
 	var err error
 
+	AppName = beego.AppConfig.String("appname")
+	SecretKey = beego.AppConfig.String("secret_key")
+	AppHost = beego.AppConfig.String("apphost")
+	AppUrl = beego.AppConfig.String("appurl")
+	AppLogo = beego.AppConfig.String("applogo")
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
 	orm.RegisterDataBase("default", "mysql", "root:@/gotalk?charset=utf8")
 

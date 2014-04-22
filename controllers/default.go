@@ -1,15 +1,14 @@
 package controllers
 
-import (
-	"github.com/astaxie/beego"
-)
+import ()
 
 type MainController struct {
-	beego.Controller
+	BaseController
 }
 
 func (this *MainController) Get() {
 	this.Data["Website"] = "beego.me"
 	this.Data["Email"] = "astaxie@gmail.com"
-	this.TplNames = "index.tpl"
+	this.Layout = "layout.html"
+	this.TplNames = "index.html"
 }

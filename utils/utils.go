@@ -26,6 +26,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/naokij/gotalk/setting"
 	"reflect"
 	"strconv"
 	"time"
@@ -101,7 +102,7 @@ func CreateTimeLimitCode(data string, minutes int, startInf interface{}) string 
 
 	// create sha1 encode string
 	sh := sha1.New()
-	sh.Write([]byte(data + beego.AppConfig.String("secret_key") + startStr + endStr + ToStr(minutes)))
+	sh.Write([]byte(data + setting.SecretKey + startStr + endStr + ToStr(minutes)))
 	encoded := hex.EncodeToString(sh.Sum(nil))
 
 	code := fmt.Sprintf("%s%06d%s", startStr, minutes, encoded)

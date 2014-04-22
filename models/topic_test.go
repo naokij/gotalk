@@ -12,17 +12,17 @@ func init() {
 }
 
 func TestTopicInsertRead(t *testing.T) {
-	user := User{}
+	user := &User{}
 	user.Id = 1
 	user.Read()
-	category := Category{Id: 1}
+	category := &Category{Id: 1}
 	category.Read()
-	Content := Content{}
+	Content := &Content{}
 	topic := Topic{}
-	topic.User = &user
-	topic.Category = &category
+	topic.User = user
+	topic.Category = category
 	topic.Title = "为什么要使用 Go 语言，Go 语言的优势在哪里？"
-	topic.Content = &Content
+	topic.Content = Content
 	topic.Content.Message = `我尝试来回答你几个问题：
 1、Go有什么优势
 
