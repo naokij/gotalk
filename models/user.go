@@ -43,7 +43,7 @@ type User struct {
 	FavTopics   int       ``
 	IsAdmin     bool      `orm:"index"`
 	IsActive    bool      `orm:"index"`
-	IsForbidden bool      `orm:"index"`
+	IsBanned    bool      `orm:"index"`
 	Salt        string    `orm:"size(6)"`
 	Created     time.Time `orm:"auto_now_add"`
 	Updated     time.Time `orm:"auto_now"`

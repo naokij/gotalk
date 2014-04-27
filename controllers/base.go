@@ -19,4 +19,26 @@ func (this *BaseController) Prepare() {
 	this.Data["AppName"] = setting.AppName
 	this.Data["AppVer"] = setting.AppVer
 	this.Data["PageTitle"] = setting.AppName
+
+	// start session
+	this.StartSession()
+
+	// read flash message
+	beego.ReadFromRequest(&this.Controller)
+}
+
+// read beego flash message
+func (this *BaseController) FlashRead(key string) (string, bool) {
+	if data, ok := this.Data["flash"].(map[string]string); ok {
+		value, ok := data[key]
+		return value, ok
+	}
+	return "", false
+}
+
+// write beego flash message
+func (this *BaseController) FlashWrite(key string, value string) {
+	flash := beego.NewFlash()
+	flash.Data[key] = value
+	flash.Store(&this.Controller)
 }

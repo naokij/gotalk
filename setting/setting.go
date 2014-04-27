@@ -37,7 +37,7 @@ const (
 	AppVer = "VERSION 0.0.1"
 )
 
-func init() {
+func ReadConfig() {
 	var err error
 
 	AppName = beego.AppConfig.String("appname")
@@ -46,11 +46,15 @@ func init() {
 	AppUrl = beego.AppConfig.String("appurl")
 	AppLogo = beego.AppConfig.String("applogo")
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
-	orm.RegisterDataBase("default", "mysql", "root:@/gotalk?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "root:@/gotalk?charset=utf8&loc=Asia%2FShanghai")
 
 	MongodbSession, err = mgo.Dial("127.0.0.1")
 	if err != nil {
 		beego.Error(err)
 	}
+
+	beego.SessionOn = true
+	beego.SessionProvider = "file"
+	beego.SessionSavePath = "/tmp"
 	//defer MongodbSession.Close()
 }
