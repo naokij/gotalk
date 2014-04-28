@@ -5,6 +5,7 @@ import (
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
 	"github.com/naokij/gotalk/utils"
+	"html/template"
 	"time"
 )
 
@@ -115,6 +116,10 @@ func (this *BaseController) Prepare() {
 
 	// read flash message
 	beego.ReadFromRequest(&this.Controller)
+
+	// pass xsrf helper to template context
+	this.Data["xsrf_token"] = this.XsrfToken()
+	this.Data["xsrf_html"] = template.HTML(this.XsrfFormHtml())
 }
 
 // read beego flash message
