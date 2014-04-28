@@ -24,13 +24,15 @@ import (
 )
 
 var (
-	AppName        string
-	AppHost        string
-	AppUrl         string
-	AppLogo        string
-	SecretKey      string
-	MongodbSession *mgo.Session
-	MongodbName    string = "gotalk"
+	AppName            string
+	AppHost            string
+	AppUrl             string
+	AppLogo            string
+	SecretKey          string
+	CookieUserName     string
+	CookieRememberName string
+	MongodbSession     *mgo.Session
+	MongodbName        string = "gotalk"
 )
 
 const (
@@ -45,6 +47,9 @@ func ReadConfig() {
 	AppHost = beego.AppConfig.String("apphost")
 	AppUrl = beego.AppConfig.String("appurl")
 	AppLogo = beego.AppConfig.String("applogo")
+	CookieUserName = beego.AppConfig.String("cookieusername")
+	CookieRememberName = beego.AppConfig.String("CookieRememberName")
+
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
 	orm.RegisterDataBase("default", "mysql", "root:@/gotalk?charset=utf8&loc=Asia%2FShanghai")
 
@@ -57,4 +62,5 @@ func ReadConfig() {
 	beego.SessionProvider = "file"
 	beego.SessionSavePath = "/tmp"
 	//defer MongodbSession.Close()
+	//todo 更好的利用mongodb session
 }
