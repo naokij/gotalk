@@ -32,6 +32,46 @@ import (
 	"time"
 )
 
+var (
+	HZRange = [15][2]int{
+		{11904, 11929},
+		{11931, 12019},
+		{12032, 12245},
+		{12293, 12293},
+		{12295, 12295},
+		{12321, 12329},
+		{12344, 12347},
+		{13312, 19893},
+		{19968, 40908},
+		{63744, 64109},
+		{64112, 64217},
+		{131072, 173782},
+		{173824, 177972},
+		{177984, 178205},
+		{194560, 195101},
+	}
+)
+
+//按照一个汉字算两个英文的方式计算字符串长度
+func HZStringLength(s string) (length int) {
+	r := []rune(s)
+	for _, v := range r {
+		var isHz bool
+		for _, subRange := range HZRange {
+			if int(v) >= subRange[0] && int(v) <= subRange[1] {
+				isHz = true
+				break
+			}
+		}
+		if isHz {
+			length += 2
+		} else {
+			length++
+		}
+	}
+	return length
+}
+
 // Random generate string
 func GetRandomString(n int) string {
 	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

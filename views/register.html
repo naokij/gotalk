@@ -1,0 +1,79 @@
+
+<div class="col-md-6">
+	<div class="panel">
+		<div class="panel-heading">注册</div>
+		<div class="panel-body">
+			<form action="/register" method="post" id="registerForm" class="form-signin" role="form">
+				{{ .xsrf_html }}
+				<div class="form-group"><label class="control-label">用户名</label><input type="text" name="username" class="form-control" placeholder="用户名" required autofocus value="{{.form.Username}}"></div>
+				<div class="form-group"><label class="control-label">密码</label><input id="password" type="password" name="password" class="form-control" placeholder="密码" required value="{{.form.Password}}"></div>
+				<div class="form-group"><input type="password" name="password_confirm" class="form-control" placeholder="重复密码" required value="{{.form.PasswordConfirm}}"></div>
+				<div class="form-group"><label class="control-label">电子邮件</label><input type="text" name="email" class="form-control" placeholder="电子邮件" required value="{{.form.Email}}"></div>
+				<div class="form-group"><button class="btn btn-lg btn-primary" type="submit">注册</button></div>
+			</form>
+		</div>
+	</div>
+</div>
+<div class="col-md-6">
+	<div class="panel">
+		<div class="panel-heading">其他注册方式</div>
+	</div>
+</div>
+<script>
+jQuery.validator.setDefaults({
+	errorClass: "has-error"
+});
+var validator = jQuery("#registerForm").validate({
+	onkeyup:false,
+	rules: {
+		username: {
+			required: true,
+			remote: "/register/validate-username",
+		},
+		password: {
+			required: true,
+			minlength: 6,
+		},
+		password_confirm: {
+			equalTo: "#password",
+			required: true,
+		},
+		email: {
+			required: true,
+			email: true,
+			remote: "/register/validate-email"
+		}
+	},
+	messages: {
+		username: {
+			required: "请输入用户名",
+		},
+		password: {
+			required: "请输入密码",
+			minlength: "密码最短6位",
+		},
+		password_confirm: {
+			required: "请再次输入密码做确认",
+			equalTo: "两次密码不一致",
+		},
+		email: {
+			required: "请输入电子邮件",
+			email: "请输入正确的电子邮件地址",
+		},
+	}
+});
+$('#password').passStrengthify({
+	minimum: 6,
+	labels: {
+		tooShort: '密码太短',
+		passwordStrength: '密码强度'
+	}});
+
+{{if .HasError}}
+validator.showErrors({
+	{{range .errors}}
+	"{{.Field}}": "{{.Message}}",
+	{{end}}
+});
+{{end}}
+</script>

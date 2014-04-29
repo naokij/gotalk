@@ -95,9 +95,38 @@ func (this *AuthController) Logout() {
 }
 
 func (this *AuthController) Register() {
-
+	this.Layout = "layout.html"
+	this.TplNames = "register.html"
 }
 
 func (this *AuthController) DoRegister() {
+	this.Layout = "layout.html"
+	this.TplNames = "register.html"
+}
 
+func (this *AuthController) ValidateUsername() {
+	username := this.GetString("username")
+	user := models.User{Username: username}
+	if err := user.ValidUsername(); err != nil {
+		this.Data["json"] = err.Error()
+	} else {
+		if user.Read("Username") == nil {
+			//这个用户名已经存在
+			this.Data["json"] = fmt.Sprintf("%s已被使用，请使用其他用户名！", username)
+		} else {
+			this.Data["json"] = true
+		}
+	}
+	this.ServeJson()
+}
+
+func (this *AuthController) ValidateEmail() {
+	email := this.GetString("email")
+	user := models.User{Email: email}
+	if user.Read("Email") == nil {
+		this.Data["json"] = "已被使用，请直接使用此电邮登录"
+	} else {
+		this.Data["json"] = true
+	}
+	this.ServeJson()
 }

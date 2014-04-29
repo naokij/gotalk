@@ -18,8 +18,10 @@ package models
 import (
 	//"fmt"
 	"encoding/hex"
+	"errors"
 	"github.com/astaxie/beego/orm"
 	"github.com/naokij/gotalk/utils"
+	"regexp"
 	"time"
 )
 
@@ -52,6 +54,7 @@ type User struct {
 const (
 	activeCodeLife = 180
 	resetPasswordCodeLife
+	UsernameRegex = `^[\p{Han}a-zA-Z0-9]+$`
 )
 
 func (m *User) Insert() error {
@@ -80,6 +83,18 @@ func (m *User) Delete() error {
 		return err
 	}
 	return nil
+}
+
+func (m *User) ValidUsername() (err error) {
+	reg := regexp.MustCompile(UsernameRegex)
+	if !reg.MatchString(m.Username) {
+		err = errors.New("只能包含英文、数字和汉字")
+	} else {
+		if !(utils.HZStringLength(m.Username) >= 3 && utils.HZStringLength(m.Username) <= 16) {
+			err = errors.New("长度3-16（汉字长度按2计算）")
+		}
+	}
+	return err
 }
 
 func (m *User) SetPassword(password string) error {

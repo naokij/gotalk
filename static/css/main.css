@@ -33,7 +33,12 @@ body {
     color: #ababab
 }
 /* 错误信息 */
-label.error{
+.has-error .form-control {
+    background-color: #000;
+    border-color: #A94442;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+}
+label.has-error{
   background-color: #F0AD4E;
   display: inline;
   padding: 0.2em 0.6em 0.3em;
