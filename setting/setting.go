@@ -17,6 +17,7 @@ limitations under the License.
 package setting
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
@@ -32,7 +33,12 @@ var (
 	CookieUserName     string
 	CookieRememberName string
 	MongodbSession     *mgo.Session
-	MongodbName        string = "gotalk"
+	MongodbHost        string
+	MongodbName        string
+	MySQLHost          string
+	MySQLUser          string
+	MySQLPassword      string
+	MySQLDB            string
 )
 
 const (
@@ -49,11 +55,17 @@ func ReadConfig() {
 	AppLogo = beego.AppConfig.String("applogo")
 	CookieUserName = beego.AppConfig.String("cookieusername")
 	CookieRememberName = beego.AppConfig.String("CookieRememberName")
+	MySQLHost = beego.AppConfig.String("mysqlhost")
+	MySQLUser = beego.AppConfig.String("mysqluser")
+	MySQLPassword = beego.AppConfig.String("mysqlpassword")
+	MySQLDB = beego.AppConfig.String("mysqldb")
+	MongodbHost = beego.AppConfig.String("mongodbhost")
+	MongodbName = beego.AppConfig.String("mongodbname")
 
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
-	orm.RegisterDataBase("default", "mysql", "root:@/gotalk?charset=utf8&loc=Asia%2FShanghai")
+	orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai")
 
-	MongodbSession, err = mgo.Dial("127.0.0.1")
+	MongodbSession, err = mgo.Dial(MongodbHost)
 	if err != nil {
 		beego.Error(err)
 	}
