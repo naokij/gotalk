@@ -19,7 +19,7 @@ type AuthController struct {
 	BaseController
 }
 
-func (this *AuthController) Get() {
+func (this *AuthController) Login() {
 	this.Layout = "layout.html"
 	this.TplNames = "login.html"
 }
@@ -33,7 +33,7 @@ func (this *AuthController) loginPageWithErrors(form LoginForm, errors []*valida
 	this.Data["HasError"] = true
 	beego.Trace(errors[0])
 }
-func (this *AuthController) Login() {
+func (this *AuthController) DoLogin() {
 	valid := validation.Validation{}
 	form := LoginForm{}
 	if err := this.ParseForm(&form); err != nil {
@@ -92,4 +92,12 @@ func (this *AuthController) Logout() {
 	this.LogUserOut()
 	this.Redirect("/", 302)
 	return
+}
+
+func (this *AuthController) Register() {
+
+}
+
+func (this *AuthController) DoRegister() {
+
 }
