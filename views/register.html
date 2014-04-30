@@ -8,7 +8,7 @@
 				<div class="form-group"><label class="control-label">用户名</label><input type="text" name="username" class="form-control" placeholder="用户名" required autofocus value="{{.form.Username}}"></div>
 				<div class="form-group"><label class="control-label">密码</label><input id="password" type="password" name="password" class="form-control" placeholder="密码" required value="{{.form.Password}}"></div>
 				<div class="form-group"><input type="password" name="password_confirm" class="form-control" placeholder="重复密码" required value="{{.form.PasswordConfirm}}"></div>
-				<div class="form-group"><label class="control-label">电子邮件</label><input type="text" name="email" class="form-control" placeholder="电子邮件" required value="{{.form.Email}}"></div>
+				<div class="form-group"><label class="control-label">电子邮件</label><input id="email" type="text" name="email" class="form-control" placeholder="电子邮件" required value="{{.form.Email}}"></div>
 				<div class="form-group"><button class="btn btn-lg btn-primary" type="submit">注册</button></div>
 			</form>
 		</div>
@@ -68,6 +68,37 @@ $('#password').passStrengthify({
 		tooShort: '密码太短',
 		passwordStrength: '密码强度'
 	}});
+var domains = ["163.com","126.com","qq.com","sina.com","vip.sina.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
+var tlds = ["com","net","org","info","edu","cn","com.cn"]
+$("#email").emailautocomplete({
+  domains: domains,
+});
+$('#email').on('blur', function() {
+  $(this).mailcheck({
+    domains: domains,
+    topLevelDomains: tlds,
+    suggested: function(element, suggestion) {
+      var emailInput = jQuery("#email");
+      if (jQuery("#suggest-label").length==0)
+      {
+      	var label = jQuery("<label></label>");
+      	label.attr("id","suggest-label");
+      	label.addClass("suggest");
+      	label.html('你要输入的是<a id="suggested-email" href="javascript:void(0);">'+suggestion.full+'</a>么？').insertAfter(emailInput);
+      }
+      else{
+      	jQuery("#suggested-email").text(suggestion.full)
+      }
+      jQuery("#suggested-email").click(function(){
+      	emailInput.val(suggestion.full);
+      	jQuery("#suggest-label").remove();
+      })
+    },
+    empty: function(element) {
+      // callback code
+    }
+  });
+});
 
 {{if .HasError}}
 validator.showErrors({
