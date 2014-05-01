@@ -138,6 +138,8 @@ func (this *AuthController) DoRegister() {
 	user := models.User{Username: form.Username}
 	if err := user.ValidUsername(); err != nil {
 		valid.SetError("username", err.Error())
+		this.registerPageWithErrors(form, valid.Errors)
+		return
 	} else {
 		if user.Read("Username") == nil {
 			valid.SetError("username", fmt.Sprintf("%s已被使用，请使用其他用户名！", form.Username))
@@ -160,7 +162,7 @@ func (this *AuthController) DoRegister() {
 		this.Abort("500")
 		return
 	}
-	this.Redirect("/welcome", 302)
+	this.Redirect("/", 302)
 	return
 }
 
@@ -196,8 +198,4 @@ func (this *AuthController) ValidateCaptcha() {
 	captchaId := this.GetString("captchaid")
 	this.Data["json"] = setting.Captcha.Verify(captchaId, captcha)
 	this.ServeJson()
-}
-
-func (this *AuthController) Welcome() {
-
 }

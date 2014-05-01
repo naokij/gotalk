@@ -15,5 +15,4 @@ func init() {
 	beego.Router("/register/validate-username", authController, "get:ValidateUsername")
 	beego.Router("/register/validate-email", authController, "get:ValidateEmail")
 	beego.Router("/register/validate-captcha", authController, "get:ValidateCaptcha")
-	beego.Router("/welcome", authController, "get:Welcome")
 }
