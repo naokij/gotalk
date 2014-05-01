@@ -6,11 +6,14 @@ import (
 )
 
 func init() {
+
 	beego.Router("/", &controllers.MainController{})
-	authRouter := new(controllers.AuthController)
-	beego.Router("/login", authRouter, "get:Login;post:DoLogin")
-	beego.Router("/logout", authRouter, "get:Logout")
-	beego.Router("/register", authRouter, "get:Register;post:DoRegister")
-	beego.Router("/register/validate-username", authRouter, "get:ValidateUsername")
-	beego.Router("/register/validate-email", authRouter, "get:ValidateEmail")
+	authController := new(controllers.AuthController)
+	beego.Router("/login", authController, "get:Login;post:DoLogin")
+	beego.Router("/logout", authController, "get:Logout")
+	beego.Router("/register", authController, "get:Register;post:DoRegister")
+	beego.Router("/register/validate-username", authController, "get:ValidateUsername")
+	beego.Router("/register/validate-email", authController, "get:ValidateEmail")
+	beego.Router("/register/validate-captcha", authController, "get:ValidateCaptcha")
+	beego.Router("/welcome", authController, "get:Welcome")
 }

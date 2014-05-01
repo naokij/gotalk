@@ -15,6 +15,7 @@ func init() {
 
 func main() {
 	setting.ReadConfig()
+	beego.EnableAdmin = true
 	beego.SetStaticPath("/static", "static")
 	beego.Run()
 }

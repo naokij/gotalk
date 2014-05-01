@@ -1,4 +1,4 @@
-
+<script src="/static/js/jquery.validate.min.js"></script>
 <div class="col-md-6">
 	<div class="panel">
 		<div class="panel-heading">登录</div>
@@ -24,7 +24,7 @@
 <script>
 jQuery.validator.setDefaults({
 });
-var validator = jQuery("#loginForm").validate({
+var validator = $("#loginForm").validate({
 	rules: {
 		username:{
 			required: true,

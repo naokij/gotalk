@@ -19,7 +19,9 @@ package setting
 import (
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/cache"
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
 	"labix.org/v2/mgo"
 )
@@ -39,6 +41,8 @@ var (
 	MySQLUser          string
 	MySQLPassword      string
 	MySQLDB            string
+	Cache              cache.Cache
+	Captcha            *captcha.Captcha
 )
 
 const (
@@ -69,6 +73,13 @@ func ReadConfig() {
 	if err != nil {
 		beego.Error(err)
 	}
+
+	// cache system
+	Cache, err = cache.NewCache("memory", `{"interval":360}`)
+
+	Captcha = captcha.NewWithFilter("/captcha/", Cache)
+	Captcha.FieldIdName = "captcha-id"
+	Captcha.FieldCaptchaName = "captcha"
 
 	beego.SessionOn = true
 	beego.SessionProvider = "file"

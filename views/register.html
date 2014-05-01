@@ -1,14 +1,21 @@
 
+<script src="/static/js/jquery.validate.min.js"></script>
+<script src="/static/js/jquery.passstrength.min.js"></script>
+<script src="/static/js/jquery.email-autocomplete.min.js"></script>
+<script src="/static/js/mailcheck.min.js"></script>
 <div class="col-md-6">
 	<div class="panel">
 		<div class="panel-heading">注册</div>
 		<div class="panel-body">
 			<form action="/register" method="post" id="registerForm" class="form-signin" role="form">
 				{{ .xsrf_html }}
-				<div class="form-group"><label class="control-label">用户名</label><input type="text" name="username" class="form-control" placeholder="用户名" required autofocus value="{{.form.Username}}"></div>
-				<div class="form-group"><label class="control-label">密码</label><input id="password" type="password" name="password" class="form-control" placeholder="密码" required value="{{.form.Password}}"></div>
-				<div class="form-group"><input type="password" name="password_confirm" class="form-control" placeholder="重复密码" required value="{{.form.PasswordConfirm}}"></div>
-				<div class="form-group"><label class="control-label">电子邮件</label><input id="email" type="text" name="email" class="form-control" placeholder="电子邮件" required value="{{.form.Email}}"></div>
+				<div class="form-group"><label class="control-label">用户名</label><input type="text" name="username" class="form-control" placeholder="用户名" autofocus value="{{.form.Username}}"></div>
+				<div class="form-group"><label class="control-label">电子邮件</label><input id="email" type="text" name="email" class="form-control" placeholder="电子邮件" value="{{.form.Email}}"></div>
+				<div class="form-group"><label class="control-label">密码</label><input id="password" type="password" name="password" class="form-control" placeholder="密码" value="{{.form.Password}}"></div>
+				<div class="form-group"><input type="password" name="password_confirm" class="form-control" placeholder="重复密码" value="{{.form.PasswordConfirm}}"></div>
+				<div class="form-group"><label class="control-label">验证码</label>
+				<div>{{create_captcha}}</div>
+				<input id="captcha" type="text" name="captcha" class="form-control" placeholder="输入图片上的数字"></div>
 				<div class="form-group"><button class="btn btn-lg btn-primary" type="submit">注册</button></div>
 			</form>
 		</div>
@@ -23,7 +30,7 @@
 jQuery.validator.setDefaults({
 	errorClass: "has-error"
 });
-var validator = jQuery("#registerForm").validate({
+var validator = $("#registerForm").validate({
 	onkeyup:false,
 	rules: {
 		username: {
@@ -42,7 +49,22 @@ var validator = jQuery("#registerForm").validate({
 			required: true,
 			email: true,
 			remote: "/register/validate-email"
-		}
+		},
+		captcha:{
+			required: true,
+			remote:{
+				url: "/register/validate-captcha",
+				type: "get",
+				data:{
+					captchaid: function(){
+						return $("[name='captcha-id']").val();
+					},
+					captcha: function(){
+						return $("#captcha").val();
+					},
+				},
+			},
+		},
 	},
 	messages: {
 		username: {
@@ -59,6 +81,10 @@ var validator = jQuery("#registerForm").validate({
 		email: {
 			required: "请输入电子邮件",
 			email: "请输入正确的电子邮件地址",
+		},
+		captcha: {
+			required: "请输入验证码",
+			remote: "验证码错误",
 		},
 	}
 });
@@ -78,20 +104,20 @@ $('#email').on('blur', function() {
     domains: domains,
     topLevelDomains: tlds,
     suggested: function(element, suggestion) {
-      var emailInput = jQuery("#email");
-      if (jQuery("#suggest-label").length==0)
+      var emailInput = $("#email");
+      if ($("#suggest-label").length==0)
       {
-      	var label = jQuery("<label></label>");
+      	var label = $("<label></label>");
       	label.attr("id","suggest-label");
       	label.addClass("suggest");
       	label.html('你要输入的是<a id="suggested-email" href="javascript:void(0);">'+suggestion.full+'</a>么？').insertAfter(emailInput);
       }
       else{
-      	jQuery("#suggested-email").text(suggestion.full)
+      	$("#suggested-email").text(suggestion.full)
       }
-      jQuery("#suggested-email").click(function(){
+      $("#suggested-email").click(function(){
       	emailInput.val(suggestion.full);
-      	jQuery("#suggest-label").remove();
+      	$("#suggest-label").remove();
       })
     },
     empty: function(element) {
