@@ -1,8 +1,3 @@
-
-<script src="/static/js/jquery.validate.min.js"></script>
-<script src="/static/js/jquery.passstrength.min.js"></script>
-<script src="/static/js/jquery.email-autocomplete.min.js"></script>
-<script src="/static/js/mailcheck.min.js"></script>
 <div class="col-md-6">
 	<div class="panel">
 		<div class="panel-heading">注册</div>
@@ -26,111 +21,118 @@
 		<div class="panel-heading">其他注册方式</div>
 	</div>
 </div>
+
+<script src="/static/js/jquery.validate.min.js"></script>
+<script src="/static/js/jquery.passstrength.min.js"></script>
+<script src="/static/js/jquery.email-autocomplete.min.js"></script>
+<script src="/static/js/mailcheck.min.js"></script>
 <script>
-jQuery.validator.setDefaults({
-	errorClass: "has-error"
-});
-var validator = $("#registerForm").validate({
-	onkeyup:false,
-	rules: {
-		username: {
-			required: true,
-			remote: "/register/validate-username",
-		},
-		password: {
-			required: true,
-			minlength: 6,
-		},
-		password_confirm: {
-			equalTo: "#password",
-			required: true,
-		},
-		email: {
-			required: true,
-			email: true,
-			remote: "/register/validate-email"
-		},
-		captcha:{
-			required: true,
-			remote:{
-				url: "/register/validate-captcha",
-				type: "get",
-				data:{
-					captchaid: function(){
-						return $("[name='captcha-id']").val();
-					},
-					captcha: function(){
-						return $("#captcha").val();
+$(function() {
+	$.validator.setDefaults({
+		errorClass: "has-error"
+	});
+	var validator = $("#registerForm").validate({
+		onkeyup:false,
+		rules: {
+			username: {
+				required: true,
+				remote: "/register/validate-username",
+			},
+			password: {
+				required: true,
+				minlength: 6,
+			},
+			password_confirm: {
+				equalTo: "#password",
+				required: true,
+			},
+			email: {
+				required: true,
+				email: true,
+				remote: "/register/validate-email"
+			},
+			captcha:{
+				required: true,
+				remote:{
+					url: "/register/validate-captcha",
+					type: "get",
+					data:{
+						captchaid: function(){
+							return $("[name='captcha-id']").val();
+						},
+						captcha: function(){
+							return $("#captcha").val();
+						},
 					},
 				},
 			},
 		},
-	},
-	messages: {
-		username: {
-			required: "请输入用户名",
-		},
-		password: {
-			required: "请输入密码",
-			minlength: "密码最短6位",
-		},
-		password_confirm: {
-			required: "请再次输入密码做确认",
-			equalTo: "两次密码不一致",
-		},
-		email: {
-			required: "请输入电子邮件",
-			email: "请输入正确的电子邮件地址",
-		},
-		captcha: {
-			required: "请输入验证码",
-			remote: "验证码错误",
-		},
-	}
-});
-$('#password').passStrengthify({
-	minimum: 6,
-	labels: {
-		tooShort: '密码太短',
-		passwordStrength: '密码强度'
-	}});
-var domains = ["163.com","126.com","qq.com","sina.com","vip.sina.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
-var tlds = ["com","net","org","info","edu","cn","com.cn"]
-$("#email").emailautocomplete({
-  domains: domains,
-});
-$('#email').on('blur', function() {
-  $(this).mailcheck({
-    domains: domains,
-    topLevelDomains: tlds,
-    suggested: function(element, suggestion) {
-      var emailInput = $("#email");
-      if ($("#suggest-label").length==0)
-      {
-      	var label = $("<label></label>");
-      	label.attr("id","suggest-label");
-      	label.addClass("suggest");
-      	label.html('你要输入的是<a id="suggested-email" href="javascript:void(0);">'+suggestion.full+'</a>么？').insertAfter(emailInput);
-      }
-      else{
-      	$("#suggested-email").text(suggestion.full)
-      }
-      $("#suggested-email").click(function(){
-      	emailInput.val(suggestion.full);
-      	$("#suggest-label").remove();
-      })
-    },
-    empty: function(element) {
-      // callback code
-    }
-  });
-});
+		messages: {
+			username: {
+				required: "请输入用户名",
+			},
+			password: {
+				required: "请输入密码",
+				minlength: "密码最短6位",
+			},
+			password_confirm: {
+				required: "请再次输入密码做确认",
+				equalTo: "两次密码不一致",
+			},
+			email: {
+				required: "请输入电子邮件",
+				email: "请输入正确的电子邮件地址",
+			},
+			captcha: {
+				required: "请输入验证码",
+				remote: "验证码错误",
+			},
+		}
+	});
+	$('#password').passStrengthify({
+		minimum: 6,
+		labels: {
+			tooShort: '密码太短',
+			passwordStrength: '密码强度'
+		}});
+	var domains = ["163.com","126.com","qq.com","sina.com","vip.sina.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
+	var tlds = ["com","net","org","info","edu","cn","com.cn"]
+	$("#email").emailautocomplete({
+	  domains: domains,
+	});
+	$('#email').on('blur', function() {
+	  $(this).mailcheck({
+	    domains: domains,
+	    topLevelDomains: tlds,
+	    suggested: function(element, suggestion) {
+	      var emailInput = $("#email");
+	      if ($("#suggest-label").length==0)
+	      {
+	      	var label = $("<label></label>");
+	      	label.attr("id","suggest-label");
+	      	label.addClass("suggest");
+	      	label.html('你要输入的是<a id="suggested-email" href="javascript:void(0);">'+suggestion.full+'</a>么？').insertAfter(emailInput);
+	      }
+	      else{
+	      	$("#suggested-email").text(suggestion.full)
+	      }
+	      $("#suggested-email").click(function(){
+	      	emailInput.val(suggestion.full);
+	      	$("#suggest-label").remove();
+	      })
+	    },
+	    empty: function(element) {
+	      // callback code
+	    }
+	  });
+	});
 
-{{if .HasError}}
-validator.showErrors({
-	{{range .errors}}
-	"{{.Field}}": "{{.Message}}",
+	{{if .HasError}}
+	validator.showErrors({
+		{{range .errors}}
+		"{{.Field}}": "{{.Message}}",
+		{{end}}
+	});
 	{{end}}
 });
-{{end}}
 </script>
