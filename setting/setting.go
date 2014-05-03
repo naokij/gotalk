@@ -41,6 +41,7 @@ var (
 	MySQLUser          string
 	MySQLPassword      string
 	MySQLDB            string
+	XSRFKey            string
 	Cache              cache.Cache
 	Captcha            *captcha.Captcha
 )
@@ -53,18 +54,19 @@ func ReadConfig() {
 	var err error
 
 	AppName = beego.AppConfig.String("appname")
-	SecretKey = beego.AppConfig.String("secret_key")
 	AppHost = beego.AppConfig.String("apphost")
 	AppUrl = beego.AppConfig.String("appurl")
 	AppLogo = beego.AppConfig.String("applogo")
 	CookieUserName = beego.AppConfig.String("cookieusername")
 	CookieRememberName = beego.AppConfig.String("CookieRememberName")
-	MySQLHost = beego.AppConfig.String("mysqlhost")
-	MySQLUser = beego.AppConfig.String("mysqluser")
-	MySQLPassword = beego.AppConfig.String("mysqlpassword")
-	MySQLDB = beego.AppConfig.String("mysqldb")
-	MongodbHost = beego.AppConfig.String("mongodbhost")
-	MongodbName = beego.AppConfig.String("mongodbname")
+	MySQLHost = beego.AppConfig.String("mysql::host")
+	MySQLUser = beego.AppConfig.String("mysql::user")
+	MySQLPassword = beego.AppConfig.String("mysql::password")
+	MySQLDB = beego.AppConfig.String("mysql::db")
+	MongodbHost = beego.AppConfig.String("mongodb::host")
+	MongodbName = beego.AppConfig.String("mongodb::name")
+	SecretKey = beego.AppConfig.String("security::secret_key")
+	XSRFKey = beego.AppConfig.String("security::xsrfkey")
 
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
 	orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai")
@@ -73,6 +75,10 @@ func ReadConfig() {
 	if err != nil {
 		beego.Error(err)
 	}
+
+	beego.EnableXSRF = true
+	beego.XSRFKEY = XSRFKey
+	beego.XSRFExpire = 360
 
 	// cache system
 	Cache, err = cache.NewCache("memory", `{"interval":360}`)
@@ -84,6 +90,5 @@ func ReadConfig() {
 	beego.SessionOn = true
 	beego.SessionProvider = "file"
 	beego.SessionSavePath = "/tmp"
-	//defer MongodbSession.Close()
 	//todo 更好的利用mongodb session
 }
