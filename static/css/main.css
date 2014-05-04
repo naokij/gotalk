@@ -87,3 +87,24 @@ label.suggest{
 .eac-sugg{
   color:#ccc;
 }
+.sns{
+  font-size: 22px;
+}
+.sns a:link{
+  color: #777;
+}
+.sns a:visited{
+  color: #777;
+}
+.sns a:hover{
+  color: #2f78ed;
+}
+.sns a:active{
+  color: #777;
+}
+.inline-block{
+  display: inline-block;
+}
+.profile-label{
+  width: 50px;
+}
