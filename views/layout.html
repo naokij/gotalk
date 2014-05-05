@@ -35,7 +35,7 @@
           <ul class="nav navbar-nav navbar-right">
             {{if .IsLogin}}
             <li><a href="{{urlfor "UserController.Profile" ":username" .User.Username}}">{{.User.Username}}</a></li>
-            <li><a href="/profile">设置</a></li>
+            <li><a href="{{urlfor "UserController.Edit" ":username" .User.Username}}">设置</a></li>
             <li><a href="/logout">登出</a></li>
             {{else}}
             <li><a href="/register">注册</a></li>
@@ -70,7 +70,7 @@
       <p class="desc">
         本社区是一个开源项目，欢迎贡献代码！
         <br>
-        Powered By GoTalk {{.AppVer}} - {{.PageStartTime|loadtimes}}ms. 后端基于<a target="_blank" href="http://beego.me">Beego</a>. 前端基于 <a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>. 图标来自 <a target="_blank" href="http://fortawesome.github.io/Font-Awesome/">Font Awesome</a>.
+        Powered By GoTalk {{.AppVer}} - {{.PageStartTime|loadtimes}}ms. 后端基于<a target="_blank" href="http://beego.me">Beego</a>. 前端基于 <a target="_blank" href="http://getbootstrap.com/">Bootstrap</a>.
       </p>
     </div>
   </footer>

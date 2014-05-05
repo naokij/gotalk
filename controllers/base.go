@@ -27,7 +27,7 @@ import (
 
 type BaseController struct {
 	beego.Controller
-	User    models.User
+	User    *models.User
 	IsLogin bool
 }
 
@@ -36,7 +36,7 @@ func (this *BaseController) loginViaSession() bool {
 	if username, ok := this.GetSession("AuthUsername").(string); username != "" && ok {
 		user := models.User{Username: username}
 		if user.Read("Username") == nil {
-			this.User = user
+			this.User = &user
 			return true
 		}
 	}
@@ -66,7 +66,7 @@ func (this *BaseController) loginViaRememberCookie() (success bool) {
 	if value != username {
 		return false
 	}
-	this.User = user
+	this.User = &user
 	this.LogUserIn(&user, true)
 
 	return true

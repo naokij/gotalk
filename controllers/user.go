@@ -33,6 +33,16 @@ func (this *UserController) Profile() {
 	if err := user.Read("Username"); err != nil {
 		this.Abort("404")
 	}
-	this.Data["User"] = user
+	this.Data["User"] = &user
 	return
+}
+
+func (this *UserController) Edit() {
+	this.Layout = "layout.html"
+	this.TplNames = "user_edit.html"
+}
+
+func (this *UserController) DoEdit() {
+	this.Layout = "layout.html"
+	this.TplNames = "user_edit.html"
 }

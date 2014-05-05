@@ -19,9 +19,11 @@ import (
 	//"fmt"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/naokij/gotalk/utils"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -83,6 +85,12 @@ func (m *User) Delete() error {
 		return err
 	}
 	return nil
+}
+
+func (m *User) AvatarUrl() (url string) {
+	hash := utils.EncodeMd5(strings.ToLower(m.Email))
+	url = fmt.Sprintf("http://www.gravatar.com/avatar/%s?d=identicon", hash)
+	return url
 }
 
 func (m *User) ValidUsername() (err error) {

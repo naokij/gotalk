@@ -1,10 +1,12 @@
-<div class="col-md-5">
+<div class="col-md-3">
 	<div class="text-center panel panel-default">
 		<div class="panel-body">
-			<img src="http://1.gravatar.com/avatar/84147bb143d6ba187e59066ecf29872c?s=220"></img>
+			<img src="{{.User.AvatarUrl}}&s=220"></img>
 			<h3>{{.User.Username}}</h3>
-			<p>读者，游民，写字的人。大理某小客栈合伙人。从前在非洲，澳洲，东南亚八国，进藏五条线，尼泊尔等游荡，现于印度，半年后中东……但求尽兴</p>
+			<a href="#" class="btn btn-success btn-follow" role="button"><span class="glyphicon glyphicon-plus"></span> 添加关注</a>
+			<p>读者，游民，写字的人。大理某小客栈合伙人。<br>从前在非洲，澳洲，东南亚八国，进藏五条线，尼泊尔等游荡，现于印度，半年后中东……但求尽兴</p>
 			<div class="sns">
+				<a href="#"><span class="glyphicon glyphicon-home"></span></a>
 				<a href="#"><i class="icon-qq"></i></a>
 				<a href="#"><i class="icon-wechat"></i></a>
 				<a href="#"><i class="icon-weibo"></i></a>
@@ -13,13 +15,13 @@
 	</div>
 	<div class="text-center panel panel-default">
 		<div class="panel-body">
-			<table class="table">
+			<table class="profile-stats table">
 				<tbody>
 					<tr>
-						<td>23</td>
-						<td>30</td>
-						<td>1500</td>
-						<td>15000</td>
+						<td><strong>23</strong></strong></td>
+						<td><strong>30</strong></td>
+						<td><strong>1500</strong></td>
+						<td><strong>15000</strong></td>
 					</tr>
 						<td>粉丝</td>
 						<td>关注</td>
@@ -30,5 +32,27 @@
 				</tbody>
 			</table>
 		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<ul class="profile-data">
+				<li><label>编号</label> {{.User.Id}}</li>
+				{{if .User.PublicEmail}}<li><label>电邮</label> {{.User.Email}}</li>{{end}}
+				<li><label>生日</label> 1981-3-3</li>
+				{{if .User.Company}}<li><label>公司</label> {{.User.Company}}</li>{{end}}
+				{{if .User.Location}}<li><label>地点</label> {{.User.Location}}</li>{{end}}
+				<li><label>加入</label> {{date .User.Created "Y-m-d"}}</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<div class="col-md-6">
+	<div class="panel panel-default">
+		<div class="panel-heading">最近帖子</div>
+		<div class="panel-body"></div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">最近回帖</div>
+		<div class="panel-body"></div>
 	</div>
 </div>

@@ -91,20 +91,37 @@ label.suggest{
   font-size: 22px;
 }
 .sns a:link{
-  color: #777;
+  color: #999;
 }
 .sns a:visited{
-  color: #777;
+  color: #999;
 }
 .sns a:hover{
   color: #2f78ed;
 }
 .sns a:active{
-  color: #777;
+  color: #999;
 }
-.inline-block{
-  display: inline-block;
+.profile-stats tbody tr td{
+  border-top:0px;
+  font-size:16px;
 }
-.profile-label{
-  width: 50px;
+.profile-stats tbody tr td strong{
+  font-size: 20px;
+  font-weight: bolder;
+}
+.profile-data {
+  list-style-type: none;
+  padding: 0px;
+  margin: 0px;
+}
+.profile-data li{
+  padding: 0 0 10px;
+}
+.profile-data li label{
+  display: block;
+  font-weight: bold;
+}
+.btn-follow {
+  margin-bottom: 10px;
 }
