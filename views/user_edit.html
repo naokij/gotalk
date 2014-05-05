@@ -13,47 +13,48 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">资料</div>
 		<div class="panel-body">
-			<form>
+			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .UserEditForm.Username}}">
+				{{ .xsrf_html }}
 				<fieldset>
 					<!-- Appended checkbox -->
 					<div class="form-group">
 						<label class="control-label" for="Email">电子邮件</label>
 						<div class="input-group">
-							<input id="Email" name="Email" class="form-control" placeholder="电子邮件" required="" type="text">
+							<input id="Email" name="Email" class="form-control" placeholder="电子邮件" type="text" value="{{.UserEditForm.Email}}">
 							<span class="input-group-addon">     
-								<input type="checkbox"> 公开     
+								<input id="PublicEmail" name="PublicEmail" type="checkbox" {{if .UserEditForm.PublicEmail}}checked{{end}}> 公开     
 							</span>
 						</div>
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Nickname">昵称</label>  
-						<input id="Nickname" name="Nickname" placeholder="昵称" class="form-control input-md" type="text">
+						<input id="Nickname" name="Nickname" placeholder="昵称" class="form-control input-md" type="text" value="{{.UserEditForm.Nickname}}">
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Info">个人简介</label>                 
-						<textarea class="form-control" id="Info" name="Info" rows="5"></textarea>
+						<textarea class="form-control" id="Info" name="Info" rows="5">{{.UserEditForm.Info}}</textarea>
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Company">公司</label>  
-						<input id="Company" name="Company" placeholder="公司" class="form-control input-md" type="text">
+						<input id="Company" name="Company" placeholder="公司" class="form-control input-md" type="text" value="{{.UserEditForm.Company}}">
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Location">所在地</label>  
-						<input id="Location" name="Location" placeholder="所在地" class="form-control input-md" type="text">
+						<input id="Location" name="Location" placeholder="所在地" class="form-control input-md" type="text" value="{{.UserEditForm.Location}}">
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Url">网址</label>  
-						<input id="Url" name="Url" placeholder="网址" class="form-control input-md" type="text">
+						<input id="Url" name="Url" placeholder="网址" class="form-control input-md" type="text" value="{{.UserEditForm.Url}}">
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Qq">QQ</label>  
-						<input id="Qq" name="Qq" placeholder="QQ号" class="form-control input-md" type="text">
+						<input id="Qq" name="Qq" placeholder="QQ号" class="form-control input-md" type="text" value="{{.UserEditForm.Qq}}">
 					</div>
 
 					<div class="form-group">
@@ -65,7 +66,7 @@
 
 					<div class="form-group">
 						<label class="control-label" for="Weibo">微博</label>  
-						<input id="Weibo" name="Weibo" placeholder="微博用户名" class="form-control input-md" type="text">
+						<input id="Weibo" name="Weibo" placeholder="微博用户名" class="form-control input-md" type="text" value="{{.UserEditForm.Weibo}}">
 					</div>
 
 					<div class="form-group">
@@ -87,16 +88,16 @@
 					<!-- Appended checkbox -->
 					<div class="form-group">
 						<label class="control-label" for="CurrentPassword">当前密码</label>
-						<input id="CurrentPassword" name="CurrentPassword" class="form-control" type="password">
+						<input id="CurrentPassword" name="CurrentPassword" class="form-control" type="password" {{.UserPasswordForm.CurrentPassword}}>
 					</div>
 
 					<div class="form-group">
 						<label class="control-label" for="Password">密码</label>  
-						<input id="Password" name="Password" placeholder="请输入新密码" class="form-control input-md" type="password">
+						<input id="Password" name="Password" placeholder="请输入新密码" class="form-control input-md" type="password" value="{{.UserPasswordForm.Password}}">
 					</div>
 
 					<div class="form-group">
-						<input name="PasswordConfirm" class="form-control" placeholder="重复密码" value="{{.form.PasswordConfirm}}" type="password">
+						<input name="PasswordConfirm" class="form-control" placeholder="重复密码" value="{{.UserPasswordForm.PasswordConfirm}}" type="password">
 					</div>
 
 					<div class="form-group">

@@ -21,6 +21,19 @@ import (
 	"github.com/naokij/gotalk/models"
 )
 
+type UserEditForm struct {
+	Email       string `form:"Email,text"valid:"Required;Email;"`
+	PublicEmail bool   `form:"PublicEmail,checkbox""`
+	Nickname    string `form:"Nickname,text"`
+	Info        string `form:"Info,textarea"`
+	Company     string `form:"Company,text"`
+	Location    string `form:"Location,text"`
+	Url         string `form:"Url,text"`
+	Qq          int    `form:"Qq,text"`
+	Wechat      string `form:"Wechat,file"`
+	Weibo       string `form:"Weibo,text"`
+}
+
 //用户控制器
 type UserController struct {
 	BaseController
@@ -49,7 +62,7 @@ func (this *UserController) Edit() {
 	} else if user.Id != this.User.Id && !this.User.IsAdmin {
 		this.Abort("403")
 	}
-	this.Data["User"] = &user
+	this.Data["UserEditForm"] = &user
 }
 
 func (this *UserController) DoEdit() {
