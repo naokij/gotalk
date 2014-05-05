@@ -40,6 +40,16 @@ func (this *UserController) Profile() {
 func (this *UserController) Edit() {
 	this.Layout = "layout.html"
 	this.TplNames = "user_edit.html"
+	user := models.User{Username: this.Ctx.Input.Param(":username")}
+	if err := user.Read("Username"); err != nil {
+		this.Abort("404")
+	}
+	if !this.IsLogin {
+		this.Abort("403")
+	} else if user.Id != this.User.Id && !this.User.IsAdmin {
+		this.Abort("403")
+	}
+	this.Data["User"] = &user
 }
 
 func (this *UserController) DoEdit() {
