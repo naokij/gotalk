@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
@@ -34,12 +35,16 @@ type BaseController struct {
 //通过session获取登录信息，并且登录
 func (this *BaseController) loginViaSession() bool {
 	if username, ok := this.GetSession("AuthUsername").(string); username != "" && ok {
+		beego.Trace("loginViaSession pass 1 Session[AuthUsername]" + username)
 		user := models.User{Username: username}
 		if user.Read("Username") == nil {
 			this.User = &user
+			beego.Trace("loginViaSession pass 2 " + fmt.Sprint(user))
 			return true
 		}
+		beego.Trace("loginViaSession pass 2 failed " + username)
 	}
+	beego.Trace("loginViaSession failed " + fmt.Sprint(this.CruSession))
 	return false
 }
 
@@ -117,7 +122,6 @@ func (this *BaseController) Prepare() {
 	}
 
 	if this.IsLogin {
-		this.IsLogin = true
 		this.Data["User"] = &this.User
 		this.Data["IsLogin"] = this.IsLogin
 

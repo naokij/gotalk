@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/orm"
 	"github.com/naokij/gotalk/utils"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -93,6 +94,11 @@ func (m *User) AvatarUrl() (url string) {
 	return url
 }
 
+func (m *User) LargeAvatarUrl() (url string) {
+	url = m.AvatarUrl() + "&s=220"
+	return
+}
+
 func (m *User) ValidUsername() (err error) {
 	reg := regexp.MustCompile(UsernameRegex)
 	if !reg.MatchString(m.Username) {
@@ -103,6 +109,19 @@ func (m *User) ValidUsername() (err error) {
 		}
 	}
 	return err
+}
+
+func (m *User) ValidateUrl() (err error) {
+	u, err := url.Parse(m.Url)
+	if err != nil {
+		err = errors.New("网址无效")
+		return err
+	}
+	if u.Scheme != "https" && u.Scheme != "http" {
+		err = errors.New("只接受http和https协议的网址")
+		return err
+	}
+	return nil
 }
 
 func (m *User) SetPassword(password string) error {

@@ -1,7 +1,7 @@
 <div class="col-md-3">
 	<div class="panel">
 		<div class="panel-body text-center">
-			<img src="{{.User.AvatarUrl}}&s=220">
+			<img src="{{.User.LargeAvatarUrl}}">
 			<div>
 				<br><br>
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avatarModal">修改头像</button>
@@ -13,8 +13,9 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">资料</div>
 		<div class="panel-body">
-			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .UserEditForm.Username}}">
+			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .TheUser.Username}}">
 				{{ .xsrf_html }}
+				<input name="action" type="hidden" value="UpdateUser">
 				<fieldset>
 					<!-- Appended checkbox -->
 					<div class="form-group">
@@ -22,7 +23,7 @@
 						<div class="input-group">
 							<input id="Email" name="Email" class="form-control" placeholder="电子邮件" type="text" value="{{.UserEditForm.Email}}">
 							<span class="input-group-addon">     
-								<input id="PublicEmail" name="PublicEmail" type="checkbox" {{if .UserEditForm.PublicEmail}}checked{{end}}> 公开     
+								<input id="PublicEmail" name="PublicEmail" type="checkbox" value="1" {{if .UserEditForm.PublicEmail}}checked{{end}}> 公开     
 							</span>
 						</div>
 					</div>
@@ -83,7 +84,9 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">密码</div>
 		<div class="panel-body">
-			<form>
+			<form id="UserPasswordForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .TheUser.Username}}">
+				{{ .xsrf_html }}
+				<input name="action" type="hidden" value="UpdatePassword">
 				<fieldset>
 					<!-- Appended checkbox -->
 					<div class="form-group">
@@ -117,7 +120,7 @@
         <h4 class="modal-title">修改头像</h4>
       </div>
       <div class="modal-body">
-        <img src="{{.User.AvatarUrl}}&s=220">
+        <img src="{{.User.LargeAvatarUrl}}">
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -127,3 +130,43 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<script src="/static/js/jquery.validate.min.js"></script>
+<script src="/static/js/jquery.passstrength.min.js"></script>
+<script src="/static/js/jquery.email-autocomplete.min.js"></script>
+<script src="/static/js/mailcheck.min.js"></script>
+<script>
+$(function() {
+	$.validator.setDefaults({
+		errorClass: "has-error"
+	});
+	var validatorForUserEditForm = $("#UserEditForm").validate({
+		onkeyup:false,
+		rules: {
+			Email: {
+				required: true,
+				email: true,
+			},
+			Url:{
+				url: true,
+			}
+		},
+		messages: {
+			Email: {
+				required: "请输入电子邮件",
+				email: "请输入正确的电子邮件地址",
+			},
+			Url:{
+				url: "网址格式错误",
+			}
+		},
+	});
+	//显示服务端错误信息
+	{{if .UserEditFormValidErrors}}
+	validatorForUserEditForm.showErrors({
+		{{range .UserEditFormValidErrors}}
+		"{{.Field}}": "{{.Message}}",
+		{{end}}
+	});
+	{{end}}
+});
+</script>

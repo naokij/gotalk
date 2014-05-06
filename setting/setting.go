@@ -88,7 +88,8 @@ func ReadConfig() {
 	Captcha.FieldCaptchaName = "captcha"
 
 	beego.SessionOn = true
-	beego.SessionProvider = "file"
-	beego.SessionSavePath = "/tmp"
+	beego.SessionProvider = "memory"
+	beego.SessionCookieLifeTime = 0
+	beego.SessionGCMaxLifetime = 86400
 	//todo 更好的利用mongodb session
 }
