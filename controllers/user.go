@@ -38,6 +38,12 @@ type UserEditForm struct {
 	Weibo       string `form:"Weibo,text"`
 }
 
+type UserPasswordForm struct {
+	CurrentPassword string `Valid:"Required"`
+	Password        string `Valid:"MinSize(6);"`
+	PasswordConfirm string `Valid:"Required;"`
+}
+
 //用户控制器
 type UserController struct {
 	BaseController
@@ -124,11 +130,34 @@ func (this *UserController) processUserEditForm(user *models.User) {
 		user.Qq = userEditForm.Qq
 		user.Weibo = userEditForm.Weibo
 		user.WeChat = userEditForm.WeChat
-		user.Update()
+		if err := user.Update(); err != nil {
+			this.Abort("500")
+		}
 		beego.Trace("User info updated!")
 	}
 }
 
 func (this *UserController) processUserPasswordForm(user *models.User) {
-
+	valid := validation.Validation{}
+	userPasswordForm := UserPasswordForm{}
+	if err := this.ParseForm(&userPasswordForm); err != nil {
+		beego.Error(err)
+	}
+	_, err := valid.Valid(userPasswordForm)
+	if err != nil {
+		beego.Error(err)
+		this.Abort("400")
+	}
+	if !user.VerifyPassword(userPasswordForm.CurrentPassword) {
+		valid.SetError("CurrentPassword", "当前密码错误")
+	}
+	if len(valid.Errors) > 0 {
+		this.Data["UserPasswordFormValidErrors"] = valid.Errors
+		beego.Trace(fmt.Sprint(valid.Errors))
+	} else {
+		user.SetPassword(userPasswordForm.Password)
+		if err := user.Update(); err != nil {
+			this.Abort("500")
+		}
+	}
 }

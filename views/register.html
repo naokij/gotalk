@@ -95,7 +95,7 @@ $(function() {
 			tooShort: '密码太短',
 			passwordStrength: '密码强度'
 		}});
-	var domains = ["163.com","126.com","qq.com","sina.com","vip.sina.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
+	var domains = ["163.com","126.com","qq.com","sina.com","vip.qq.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
 	var tlds = ["com","net","org","info","edu","cn","com.cn"]
 	$("#email").emailautocomplete({
 	  domains: domains,
@@ -130,7 +130,7 @@ $(function() {
 	{{if .HasError}}
 	validator.showErrors({
 		{{range .errors}}
-		"{{.Field}}": "{{.Message}}",
+		"{{.Field|jsescape}}": "{{.Message|jsescape}}",
 		{{end}}
 	});
 	{{end}}
