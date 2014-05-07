@@ -18,4 +18,5 @@ func init() {
 	userController := new(controllers.UserController)
 	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")
 	beego.Router("/user/:username(.+)", userController, "get:Profile")
+	beego.Router("/user/validate-password", userController, "post:ValidatePassword")
 }

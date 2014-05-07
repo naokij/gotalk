@@ -161,3 +161,20 @@ func (this *UserController) processUserPasswordForm(user *models.User) {
 		}
 	}
 }
+
+func (this *UserController) ValidatePassword() {
+	username := this.GetString("Username")
+	currentPassword := this.GetString("CurrentPassword")
+	user := models.User{Username: username}
+	if err := user.Read("Username"); err != nil {
+		this.Data["json"] = false
+		this.ServeJson()
+		return
+	}
+	if user.VerifyPassword(currentPassword) {
+		this.Data["json"] = true
+	} else {
+		this.Data["json"] = false
+	}
+	this.ServeJson()
+}

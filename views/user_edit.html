@@ -137,7 +137,7 @@
 <script>
 $(function() {
 	$.validator.setDefaults({
-		errorClass: "has-error"
+		errorClass: "has-error",
 	});
 	var validatorForUserEditForm = $("#UserEditForm").validate({
 		onkeyup:false,
@@ -157,7 +157,7 @@ $(function() {
 			},
 			Url:{
 				url: "网址格式错误",
-			}
+			},
 		},
 	});
 	var validatorForUserPasswordForm = $("#UserPasswordForm").validate({
@@ -165,6 +165,15 @@ $(function() {
 		rules:{
 			CurrentPassword:{
 				required: true,
+				minlength: 6,
+				remote: {
+					url: "{{urlfor "UserController.ValidatePassword"|jsescape}}",
+					type: "post",
+					data:{
+						Username : "{{.TheUser.Username|jsescape}}",
+						_xsrf : "{{.xsrf_token}}",
+					},
+				},
 			},
 			Password:{
 				required: true,
@@ -178,6 +187,8 @@ $(function() {
 		messages:{
 			CurrentPassword:{
 				required: "请输入当前密码",
+				minlength: "密码最短6位",
+				remote: "当前密码错误",
 			},
 			Password:{
 				required: "请输入新密码",
@@ -187,8 +198,14 @@ $(function() {
 				required: "请再次输入密码做确认",
 				equalTo: "两次密码不一致",
 			},
-		}
+		},
 	});
+	$('#Password').passStrengthify({
+		minimum: 6,
+		labels: {
+			tooShort: '密码太短',
+			passwordStrength: '密码强度'
+		}});
 	var domains = ["163.com","126.com","qq.com","sina.com","vip.qq.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
 	var tlds = ["com","net","org","info","edu","cn","com.cn"]
 	$("#Email").emailautocomplete({
