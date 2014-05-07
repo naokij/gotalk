@@ -13,7 +13,7 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">资料</div>
 		<div class="panel-body">
-			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .TheUser.Username}}">
+			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
 				{{ .xsrf_html }}
 				<input name="action" type="hidden" value="UpdateUser">
 				<fieldset>
@@ -84,7 +84,7 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">密码</div>
 		<div class="panel-body">
-			<form id="UserPasswordForm" name="UserEditForm" method="post" action="{{urlfor "UserController.DoEdit" ":username" .TheUser.Username}}">
+			<form id="UserPasswordForm" name="UserEditForm" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
 				{{ .xsrf_html }}
 				<input name="action" type="hidden" value="UpdatePassword">
 				<fieldset>
