@@ -17,12 +17,15 @@ limitations under the License.
 package controllers
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
+	"path/filepath"
+	"strings"
 )
 
 type UserEditForm struct {
@@ -77,6 +80,8 @@ func (this *UserController) Edit() {
 			this.processUserEditForm(&user)
 		case "UpdatePassword":
 			this.processUserPasswordForm(&user)
+		case "UploadAvatar":
+			this.processUploadAvatar(&user)
 		}
 	}
 	if this.Data["UserEditForm"] == nil {
@@ -160,6 +165,29 @@ func (this *UserController) processUserPasswordForm(user *models.User) {
 			this.Abort("500")
 		}
 	}
+}
+
+func (this *UserController) processUploadAvatar(user *models.User) {
+	valid := validation.Validation{}
+	_, header, err := this.GetFile("Avatar")
+	if err != nil {
+		this.Abort("400")
+	}
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != "png" {
+		valid.SetError("Avatar", "只允许jpg, png类型的图片")
+	}
+	tmpFileName := setting.TmpPath + uuid.New() + ext
+	beego.Trace(tmpFileName)
+	if len(valid.Errors) > 0 {
+		this.Data["UserAvatarFormValidErrors"] = valid.Errors
+		beego.Trace(fmt.Sprint(valid.Errors))
+	}
+	this.SaveToFile("Avatar", tmpFileName)
+	//defer 删除临时文件
+	//制作缩略图
+	//setting.Filestore.Put("/avatar")
+	//保存用户资料
 }
 
 func (this *UserController) ValidatePassword() {

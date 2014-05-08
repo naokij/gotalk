@@ -42,6 +42,7 @@ var (
 	MySQLPassword      string
 	MySQLDB            string
 	XSRFKey            string
+	TmpPath            string
 	Cache              cache.Cache
 	Captcha            *captcha.Captcha
 )
@@ -57,6 +58,7 @@ func ReadConfig() {
 	AppHost = beego.AppConfig.String("apphost")
 	AppUrl = beego.AppConfig.String("appurl")
 	AppLogo = beego.AppConfig.String("applogo")
+	TmpPath = beego.AppConfig.String("tmppath")
 	CookieUserName = beego.AppConfig.String("cookieusername")
 	CookieRememberName = beego.AppConfig.String("CookieRememberName")
 	MySQLHost = beego.AppConfig.String("mysql::host")

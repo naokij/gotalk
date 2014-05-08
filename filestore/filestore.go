@@ -22,7 +22,7 @@ import (
 )
 
 type Provider interface {
-	Init(config string) error
+	Init(config string) (err error)
 	PutFile(localFileUrl string, remoteFileUrl string) (url string, err error)
 	Get(filename string) (data []byte, err error)
 	Delete(filename string) (files int, err error)
@@ -43,8 +43,8 @@ type managerConfig struct {
 }
 
 type Manager struct {
-	provider Provider
-	config   *managerConfig
+	Provider
+	config *managerConfig
 }
 
 var provides = make(map[string]Provider)
@@ -84,9 +84,4 @@ func NewManager(provideName, config string) (*Manager, error) {
 		provider,
 		cf,
 	}, nil
-}
-
-func (manager *Manager) Provider() (provider Provider) {
-
-	return
 }

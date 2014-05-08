@@ -4,7 +4,14 @@
 			<img src="{{.User.LargeAvatarUrl}}">
 			<div>
 				<br><br>
-				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#avatarModal">修改头像</button>
+				<form id="UserAvatarForm" name="UserAvatarForm" enctype="multipart/form-data" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
+					{{ .xsrf_html }}
+					<input name="action" type="hidden" value="UploadAvatar">
+					<div class="form-group">
+						<input type="file" id="Avatar" name="Avatar" accept="image/*">
+					</div>
+					<button id="" name="" class="btn btn-block btn-primary">上传头像</button>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -131,6 +138,7 @@
 </div><!-- /.modal -->
 
 <script src="/static/js/jquery.validate.min.js"></script>
+<script src="/static/js/additional-methods.min.js"></script>
 <script src="/static/js/jquery.passstrength.min.js"></script>
 <script src="/static/js/jquery.email-autocomplete.min.js"></script>
 <script src="/static/js/mailcheck.min.js"></script>
@@ -138,6 +146,21 @@
 $(function() {
 	$.validator.setDefaults({
 		errorClass: "has-error",
+	});
+	var validatorForUserAvatarForm = $("#UserAvatarForm").validate({
+		onkeyup: false,
+		rules: {
+			Avatar: {
+				required :true,
+				extension: "jpeg|jpg|png",
+			}
+		},
+		messages:{
+			Avatar:{
+				required: "请选择头像图片",
+				extension: "只允许jpg和png类型的图片",
+			},
+		},
 	});
 	var validatorForUserEditForm = $("#UserEditForm").validate({
 		onkeyup:false,
@@ -238,6 +261,13 @@ $(function() {
 	  });
 	});
 	//显示服务端错误信息
+	{{if .UserAvatarFormValidErrors}}
+	validatorForUserAvatarForm.showErrors({
+		{{range .UserAvatarFormValidErrors}}
+		"{{.Field|jsescape}}": "{{.Message|jsescape}}",
+		{{end}}
+	});
+	{{end}}
 	{{if .UserEditFormValidErrors}}
 	validatorForUserEditForm.showErrors({
 		{{range .UserEditFormValidErrors}}

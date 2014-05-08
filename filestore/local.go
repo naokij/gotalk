@@ -20,6 +20,24 @@ type LocalProvider struct {
 
 var localpder = &LocalProvider{}
 
+func (p *LocalProvider) Init(config string) (err error) {
+	return nil
+}
+
+func (p *LocalProvider) PutFile(localFileUrl string, remoteFileUrl string) (url string, err error) {
+	return "", nil
+}
+func (p *LocalProvider) Get(filename string) (data []byte, err error) {
+	return []byte(""), nil
+}
+
+func (p *LocalProvider) Delete(filename string) (files int, err error) {
+	return 0, nil
+}
+func (p *LocalProvider) List(path string) (entries []Entry, err error) {
+	return make([]Entry, 0), nil
+}
+
 func init() {
 	Register("local", localpder)
 }
