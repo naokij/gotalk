@@ -22,6 +22,7 @@ import (
 	"github.com/astaxie/beego/validation"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
+	"net/url"
 )
 
 //登录表单
@@ -47,6 +48,15 @@ type AuthController struct {
 }
 
 func (this *AuthController) Login() {
+	returnUrl := this.Ctx.Input.Param(":returnurl")
+	if returnUrl != "" {
+		u, err := url.Parse(returnUrl)
+		if err == nil {
+			if u.Host == setting.AppHost {
+				this.SetSession("ReturnUrl", returnUrl)
+			}
+		}
+	}
 	this.Data["PageTitle"] = fmt.Sprintf("登录 | %s", setting.AppName)
 	this.Layout = "layout.html"
 	this.TplNames = "login.html"
@@ -107,7 +117,12 @@ func (this *AuthController) DoLogin() {
 		remember = true
 	}
 	this.LogUserIn(&user, remember)
-	this.Redirect("/", 302)
+	if returnUrl, ok := this.GetSession("ReturnUrl").(string); returnUrl != "" && ok {
+		this.DelSession("ReturnUrl")
+		this.Redirect(returnUrl, 302)
+	} else {
+		this.Redirect("/", 302)
+	}
 	return
 }
 
@@ -178,6 +193,7 @@ func (this *AuthController) DoRegister() {
 		this.Abort("500")
 		return
 	}
+	this.LogUserIn(&user, false)
 	this.Redirect("/", 302)
 	return
 }

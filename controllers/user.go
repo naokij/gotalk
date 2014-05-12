@@ -34,7 +34,7 @@ type UserEditForm struct {
 	Company     string `form:"Company,text"`
 	Location    string `form:"Location,text"`
 	Url         string `form:"Url,text"`
-	Qq          int    `form:"Qq,text"`
+	Qq          string `form:"Qq,text"`
 	WeChat      string `form:"WeChat,file"`
 	Weibo       string `form:"Weibo,text"`
 }
@@ -57,7 +57,7 @@ func (this *UserController) Profile() {
 	if err := user.Read("Username"); err != nil {
 		this.Abort("404")
 	}
-	this.Data["User"] = &user
+	this.Data["TheUser"] = &user
 	return
 }
 

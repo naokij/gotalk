@@ -10,6 +10,7 @@ func init() {
 	beego.Router("/", &controllers.MainController{})
 	authController := new(controllers.AuthController)
 	beego.Router("/login", authController, "get:Login;post:DoLogin")
+	beego.Router("/login/:returnurl(.+)", authController, "get:Login")
 	beego.Router("/logout", authController, "get:Logout")
 	beego.Router("/register", authController, "get:Register;post:DoRegister")
 	beego.Router("/register/validate-username", authController, "get:ValidateUsername")

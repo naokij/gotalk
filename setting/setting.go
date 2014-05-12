@@ -21,6 +21,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/cache"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/astaxie/beego/session/mysql"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/naokij/gotalk/filestore"
@@ -35,7 +36,6 @@ var (
 	SecretKey          string
 	CookieUserName     string
 	CookieRememberName string
-	MongodbSession     *mgo.Session
 	MongodbHost        string
 	MongodbName        string
 	MySQLHost          string
@@ -44,10 +44,14 @@ var (
 	MySQLDB            string
 	XSRFKey            string
 	TmpPath            string
-	Cache              cache.Cache
-	Captcha            *captcha.Captcha
-	AvatarFSM          *filestore.Manager
-	AttachmentFSM      *filestore.Manager
+)
+
+var (
+	Cache          cache.Cache
+	MongodbSession *mgo.Session
+	Captcha        *captcha.Captcha
+	AvatarFSM      *filestore.Manager
+	AttachmentFSM  *filestore.Manager
 )
 
 const (
@@ -93,7 +97,8 @@ func ReadConfig() {
 	Captcha.FieldCaptchaName = "captcha"
 
 	beego.SessionOn = true
-	beego.SessionProvider = "memory"
+	beego.SessionProvider = "mysql"
+	beego.SessionSavePath = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB) + "&loc=Asia%2FShanghai"
 	beego.SessionCookieLifeTime = 0
 	beego.SessionGCMaxLifetime = 86400
 	//todo 更好的利用mongodb session

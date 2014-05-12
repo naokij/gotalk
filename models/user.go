@@ -49,7 +49,7 @@ type User struct {
 	Info        string    ``
 	Weibo       string    `orm:"size(30)"`
 	WeChat      string    `orm:"size(20)"`
-	Qq          int       ``
+	Qq          string    `orm:"size(20)"`
 	PublicEmail bool      ``
 	Followers   int       ``
 	Following   int       ``

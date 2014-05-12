@@ -1,11 +1,11 @@
 <div class="col-md-3">
 	<div class="text-center panel panel-default">
 		<div class="panel-body">
-			<img src="{{.User.LargeAvatarUrl}}"></img>
-			<h3>{{.User.Username}}</h3>
+			<img src="{{.TheUser.LargeAvatarUrl}}"></img>
+			<h3>{{.TheUser.Username}}</h3>
 			<a href="#" class="btn btn-success btn-follow" role="button"><span class="glyphicon glyphicon-plus"></span> 添加关注</a>
-			{{if .User.Info}}
-			<p>{{.User.Info|nl2br}}</p>
+			{{if .TheUser.Info}}
+			<p>{{.TheUser.Info|nl2br}}</p>
 			{{end}}
 			<div class="sns">
 				<a href="#"><span class="glyphicon glyphicon-home"></span></a>
@@ -38,12 +38,12 @@
 	<div class="panel panel-default">
 		<div class="panel-body">
 			<ul class="profile-data">
-				<li><label>编号</label> {{.User.Id}}</li>
-				{{if .User.PublicEmail}}<li><label>电邮</label> {{.User.Email}}</li>{{end}}
+				<li><label>编号</label> {{.TheUser.Id}}</li>
+				{{if .TheUser.PublicEmail}}<li><label>电邮</label> {{.TheUser.Email}}</li>{{end}}
 				<li><label>生日</label> 1981-3-3</li>
-				{{if .User.Company}}<li><label>公司</label> {{.User.Company}}</li>{{end}}
-				{{if .User.Location}}<li><label>地点</label> {{.User.Location}}</li>{{end}}
-				<li><label>加入</label> {{date .User.Created "Y-m-d"}}</li>
+				{{if .TheUser.Company}}<li><label>公司</label> {{.TheUser.Company}}</li>{{end}}
+				{{if .TheUser.Location}}<li><label>地点</label> {{.TheUser.Location}}</li>{{end}}
+				<li><label>加入</label> {{date .TheUser.Created "Y-m-d"}}</li>
 			</ul>
 		</div>
 	</div>
