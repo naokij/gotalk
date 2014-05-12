@@ -23,6 +23,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/naokij/gotalk/filestore"
 	"labix.org/v2/mgo"
 )
 
@@ -45,6 +46,8 @@ var (
 	TmpPath            string
 	Cache              cache.Cache
 	Captcha            *captcha.Captcha
+	AvatarFSM          *filestore.Manager
+	AttachmentFSM      *filestore.Manager
 )
 
 const (
@@ -94,4 +97,14 @@ func ReadConfig() {
 	beego.SessionCookieLifeTime = 0
 	beego.SessionGCMaxLifetime = 86400
 	//todo 更好的利用mongodb session
+
+	avatarstore := beego.AppConfig.String("avatar::store")
+	switch avatarstore {
+	case "local":
+		avatarConfig := filestore.Config{FSPath: beego.AppConfig.String("avatar::local_path"), UrlPrefix: beego.AppConfig.String("avatar::url")}
+		AvatarFSM, err = filestore.NewManager(avatarstore, avatarConfig)
+	}
+	if err != nil {
+		beego.Error(err)
+	}
 }

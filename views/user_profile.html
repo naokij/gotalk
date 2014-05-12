@@ -1,10 +1,12 @@
 <div class="col-md-3">
 	<div class="text-center panel panel-default">
 		<div class="panel-body">
-			<img src="{{.User.AvatarUrl}}&s=220"></img>
+			<img src="{{.User.LargeAvatarUrl}}"></img>
 			<h3>{{.User.Username}}</h3>
 			<a href="#" class="btn btn-success btn-follow" role="button"><span class="glyphicon glyphicon-plus"></span> 添加关注</a>
-			<p>读者，游民，写字的人。大理某小客栈合伙人。<br>从前在非洲，澳洲，东南亚八国，进藏五条线，尼泊尔等游荡，现于印度，半年后中东……但求尽兴</p>
+			{{if .User.Info}}
+			<p>{{.User.Info|nl2br}}</p>
+			{{end}}
 			<div class="sns">
 				<a href="#"><span class="glyphicon glyphicon-home"></span></a>
 				<a href="#"><i class="icon-qq"></i></a>

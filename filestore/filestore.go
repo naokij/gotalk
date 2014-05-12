@@ -16,17 +16,17 @@ limitations under the License.
 package filestore
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 )
 
 type Provider interface {
-	Init(config string) (err error)
+	Init(config Config) (err error)
 	PutFile(localFileUrl string, remoteFileUrl string) (url string, err error)
 	Get(filename string) (data []byte, err error)
-	Delete(filename string) (files int, err error)
+	Delete(filename string) (err error)
 	List(path string) (entries []Entry, err error)
+	GetConfig() *Config
 }
 
 type Entry struct {
@@ -37,14 +37,16 @@ type Entry struct {
 	MimeType string `json:"mimeType"`
 }
 
-type managerConfig struct {
-	UrlPrefix      string `json:"urlPrefix"`
-	ProviderConfig string `json:"providerConfig"`
+type Config struct {
+	UrlPrefix string `json:"urlPrefix"`
+	FSPath    string `json:"fSPath"`
+	Host      string `json:"host"`
+	User      string `json:"user"`
+	Password  string `json:"password"`
 }
 
 type Manager struct {
 	Provider
-	config *managerConfig
 }
 
 var provides = make(map[string]Provider)
@@ -62,26 +64,21 @@ func Register(name string, provide Provider) {
 	provides[name] = provide
 }
 
-func NewManager(provideName, config string) (*Manager, error) {
+func NewManager(provideName string, cf Config) (*Manager, error) {
 	provider, ok := provides[provideName]
 	if !ok {
 		return nil, fmt.Errorf("filestore: unknown provide %q (forgotten import?)", provideName)
 	}
-	cf := new(managerConfig)
-	err := json.Unmarshal([]byte(config), cf)
-	if err != nil {
-		return nil, err
-	}
+
 	if cf.UrlPrefix == "" {
 		return nil, errors.New("filestore: no urlPrefix provided")
 	}
-	err = provider.Init(cf.ProviderConfig)
+	err := provider.Init(cf)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Manager{
 		provider,
-		cf,
 	}, nil
 }

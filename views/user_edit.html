@@ -1,10 +1,10 @@
 <div class="col-md-3">
 	<div class="panel">
 		<div class="panel-body text-center">
-			<img src="{{.User.LargeAvatarUrl}}">
+			<img src="{{.TheUser.LargeAvatarUrl}}">
 			<div>
 				<br><br>
-				<form id="UserAvatarForm" name="UserAvatarForm" enctype="multipart/form-data" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
+				<form id="UserAvatarForm" name="UserAvatarForm" enctype="multipart/form-data" method="post" action="{{urlfor "UserController.Edit" ":username" .TheUser.Username}}">
 					{{ .xsrf_html }}
 					<input name="action" type="hidden" value="UploadAvatar">
 					<div class="form-group">

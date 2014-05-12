@@ -17,12 +17,20 @@ package models
 
 import (
 	//"fmt"
+	"code.google.com/p/go-uuid/uuid"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/astaxie/beego/orm"
+	"github.com/disintegration/imaging"
+	"github.com/naokij/gotalk/setting"
 	"github.com/naokij/gotalk/utils"
+	"image"
+	"image/jpeg"
+	"image/png"
+	"io"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -89,14 +97,27 @@ func (m *User) Delete() error {
 }
 
 func (m *User) AvatarUrl() (url string) {
-	hash := utils.EncodeMd5(strings.ToLower(m.Email))
-	url = fmt.Sprintf("http://www.gravatar.com/avatar/%s?d=identicon", hash)
+	if m.Avatar == "" {
+		url = m.gravatarUrl(48)
+	} else {
+		url = setting.AvatarFSM.GetConfig().UrlPrefix + string(m.Avatar[0]) + "/" + string(m.Avatar[1]) + "/" + m.Avatar + "-m.png"
+	}
 	return url
 }
 
 func (m *User) LargeAvatarUrl() (url string) {
-	url = m.AvatarUrl() + "&s=220"
+	if m.Avatar == "" {
+		url = m.gravatarUrl(220)
+	} else {
+		url = setting.AvatarFSM.GetConfig().UrlPrefix + string(m.Avatar[0]) + "/" + string(m.Avatar[1]) + "/" + m.Avatar + "-l.png"
+	}
 	return
+}
+
+func (m *User) gravatarUrl(size int) (url string) {
+	hash := utils.EncodeMd5(strings.ToLower(m.Email))
+	url = fmt.Sprintf("http://gravatar.duoshuo.com/avatar/%s?d=identicon&size=%d", hash, size)
+	return url
 }
 
 func (m *User) ValidUsername() (err error) {
@@ -173,6 +194,61 @@ func (m *User) VerifyActivateCode(code string) bool {
 	}
 
 	return false
+}
+
+func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error {
+	ext := strings.ToLower(filepath.Ext(filename))
+	if ext != ".jpg" && ext != ".jpeg" && ext != "png" {
+		return errors.New("只允许jpg, png类型的图片")
+	}
+	var img image.Image
+	var err error
+	switch ext {
+	case ".jpg", ".jpeg":
+		img, err = jpeg.Decode(avatarFile)
+		if err != nil {
+			return errors.New("无法识别此jpg文件")
+		}
+	case ".png":
+		img, err = png.Decode(avatarFile)
+		if err != nil {
+			return errors.New("无法识别此png文件")
+		}
+	}
+	//crop正方形
+	bound := img.Bounds()
+	if w, h := bound.Dx(), bound.Dy(); w > h {
+		img = imaging.CropCenter(img, h, h)
+	} else if w < h {
+		img = imaging.CropCenter(img, w, w)
+	}
+	//制作缩略图
+	imgL := imaging.Resize(img, 220, 220, imaging.Lanczos)
+	imgM := imaging.Resize(img, 48, 48, imaging.Lanczos)
+	imgS := imaging.Resize(img, 24, 24, imaging.Lanczos)
+	uuid := strings.Replace(uuid.New(), "-", "", -1)
+	ext = ".png"
+	imgLName, imgMName, imgSName := setting.TmpPath+uuid+"-l.png", setting.TmpPath+uuid+"-m.png", setting.TmpPath+uuid+"-s.png"
+	errL, errM, errS := imaging.Save(imgL, imgLName), imaging.Save(imgM, imgMName), imaging.Save(imgS, imgSName)
+	if errL != nil || errM != nil || errS != nil {
+		return errors.New("无法保存头像临时文件")
+	}
+
+	_, errL = setting.AvatarFSM.PutFile(imgLName, string(uuid[0])+"/"+string(uuid[1])+"/"+uuid+"-l.png")
+	_, errM = setting.AvatarFSM.PutFile(imgMName, string(uuid[0])+"/"+string(uuid[1])+"/"+uuid+"-m.png")
+	_, errS = setting.AvatarFSM.PutFile(imgSName, string(uuid[0])+"/"+string(uuid[1])+"/"+uuid+"-s.png")
+
+	if errL != nil || errM != nil || errS != nil {
+		return errors.New("无法保存头像")
+	}
+	if m.Avatar != "" {
+		errL = setting.AvatarFSM.Delete(m.Avatar + "-l.png")
+		errM = setting.AvatarFSM.Delete(m.Avatar + "-m.png")
+		errS = setting.AvatarFSM.Delete(m.Avatar + "-s.png")
+	}
+	m.Avatar = uuid
+	//errL, errM, errS = setting.AvatarFSM.Delete
+	return nil
 }
 
 func (u *User) TableEngine() string {
