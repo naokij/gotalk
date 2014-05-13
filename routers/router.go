@@ -6,6 +6,9 @@ import (
 )
 
 func init() {
+	beego.Errorhandler("404", controllers.Error404)
+	beego.Errorhandler("403", controllers.Error403)
+	beego.Errorhandler("500", controllers.Error500)
 
 	beego.Router("/", &controllers.MainController{})
 	authController := new(controllers.AuthController)

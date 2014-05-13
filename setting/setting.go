@@ -87,7 +87,7 @@ func ReadConfig() {
 
 	beego.EnableXSRF = true
 	beego.XSRFKEY = XSRFKey
-	beego.XSRFExpire = 360
+	beego.XSRFExpire = 60
 
 	// cache system
 	Cache, err = cache.NewCache("memory", `{"interval":360}`)
