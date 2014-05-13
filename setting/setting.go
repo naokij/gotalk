@@ -20,8 +20,9 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/cache"
+	_ "github.com/astaxie/beego/cache/redis"
 	"github.com/astaxie/beego/orm"
-	_ "github.com/astaxie/beego/session/mysql"
+	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/naokij/gotalk/filestore"
@@ -44,6 +45,8 @@ var (
 	MySQLDB            string
 	XSRFKey            string
 	TmpPath            string
+	RedisHost          string
+	RedisPort          string
 )
 
 var (
@@ -76,6 +79,8 @@ func ReadConfig() {
 	MongodbName = beego.AppConfig.String("mongodb::name")
 	SecretKey = beego.AppConfig.String("security::secret_key")
 	XSRFKey = beego.AppConfig.String("security::xsrfkey")
+	RedisHost = beego.AppConfig.String("redis::host")
+	RedisPort = beego.AppConfig.String("redis::port")
 
 	orm.RegisterDriver("mysql", orm.DR_MySQL)
 	orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai")
@@ -90,15 +95,15 @@ func ReadConfig() {
 	beego.XSRFExpire = 60
 
 	// cache system
-	Cache, err = cache.NewCache("memory", `{"interval":360}`)
+	Cache, err = cache.NewCache("redis", fmt.Sprintf(`{"conn":"%s:%s"}`, RedisHost, RedisPort))
 
 	Captcha = captcha.NewWithFilter("/captcha/", Cache)
 	Captcha.FieldIdName = "captcha-id"
 	Captcha.FieldCaptchaName = "captcha"
 
 	beego.SessionOn = true
-	beego.SessionProvider = "mysql"
-	beego.SessionSavePath = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB) + "&loc=Asia%2FShanghai"
+	beego.SessionProvider = "redis"
+	beego.SessionSavePath = RedisHost + ":" + RedisPort
 	beego.SessionCookieLifeTime = 0
 	beego.SessionGCMaxLifetime = 86400
 	//todo 更好的利用mongodb session
