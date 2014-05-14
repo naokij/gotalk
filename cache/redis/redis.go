@@ -3,12 +3,9 @@ package cache
 import (
 	"encoding/json"
 	"errors"
-	"time"
-
-	"github.com/beego/redigo/redis"
-
-	"fmt"
 	"github.com/astaxie/beego/cache"
+	"github.com/beego/redigo/redis"
+	"time"
 )
 
 var (
@@ -82,20 +79,8 @@ func (rc *RedisCache) Decr(key string) error {
 
 // clean all cache in redis. delete this redis collection.
 func (rc *RedisCache) ClearAll() error {
-	var keys []string
-	replyKeys, err := redis.Values(rc.do("KEYS", rc.key+"*"))
-	if err != nil {
-		return err
-	}
-	if err := redis.ScanSlice(replyKeys, &keys); err != nil {
-		return err
-	}
-	for _, key := range keys {
-		if _, err := rc.do("DEL", key); err != nil {
-			return err
-		}
-	}
-	return nil
+	_, err := rc.do("FLUSHDB")
+	return err
 }
 
 // start redis cache adapter.
