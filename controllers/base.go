@@ -18,10 +18,10 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/cache"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
 	"github.com/naokij/gotalk/utils"
-	"html/template"
 	"time"
 )
 
@@ -136,9 +136,12 @@ func (this *BaseController) Prepare() {
 	// read flash message
 	beego.ReadFromRequest(&this.Controller)
 
-	// pass xsrf helper to template context
-	this.Data["xsrf_token"] = this.XsrfToken()
-	this.Data["xsrf_html"] = template.HTML(this.XsrfFormHtml())
+	//检查once token，防止表单多次提交
+	if this.Ctx.Request.Method == "POST" || this.Ctx.Request.Method == "DELETE" || this.Ctx.Request.Method == "PUT" ||
+		(this.Ctx.Request.Method == "POST" && (this.Ctx.Request.Form.Get("_method") == "delete" || this.Ctx.Request.Form.Get("_method") == "put")) {
+		this.CheckOnceToken()
+	}
+
 }
 
 // read beego flash message
@@ -155,4 +158,17 @@ func (this *BaseController) FlashWrite(key string, value string) {
 	flash := beego.NewFlash()
 	flash.Data[key] = value
 	flash.Store(&this.Controller)
+}
+
+//验证防重复提交token
+func (this *BaseController) CheckOnceToken() {
+	token := this.GetString("_once")
+	if token == "" {
+		this.Abort("Once")
+	}
+	if check := cache.GetInt(setting.Cache.Get("Once_" + token)); check == 1 {
+		setting.Cache.Delete("Once_" + token)
+	} else {
+		this.Abort("Once")
+	}
 }

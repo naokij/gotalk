@@ -44,3 +44,10 @@ func Error500(rw http.ResponseWriter, r *http.Request) {
 	data["Title"] = "服务器内部错误 | " + setting.AppName
 	t.Execute(rw, data)
 }
+
+func ErrorOnce(rw http.ResponseWriter, r *http.Request) {
+	t, _ := template.New("once.html").ParseFiles(beego.ViewsPath + "/errors/once.html")
+	data := make(map[string]interface{})
+	data["Title"] = "重复提交 | " + setting.AppName
+	t.Execute(rw, data)
+}

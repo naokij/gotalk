@@ -90,9 +90,9 @@ func ReadConfig() {
 		beego.Error(err)
 	}
 
-	beego.EnableXSRF = true
-	beego.XSRFKEY = XSRFKey
-	beego.XSRFExpire = 60
+	// beego.EnableXSRF = true
+	// beego.XSRFKEY = XSRFKey
+	// beego.XSRFExpire = 60
 
 	// cache system
 	Cache, err = cache.NewCache("redis", fmt.Sprintf(`{"conn":"%s:%s"}`, RedisHost, RedisPort))

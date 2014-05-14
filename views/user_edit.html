@@ -5,7 +5,7 @@
 			<div>
 				<br><br>
 				<form id="UserAvatarForm" name="UserAvatarForm" enctype="multipart/form-data" method="post" action="{{urlfor "UserController.Edit" ":username" .TheUser.Username}}">
-					{{ .xsrf_html }}
+					{{ onceformhtml }}
 					<input name="action" type="hidden" value="UploadAvatar">
 					<div class="form-group">
 						<input type="file" id="Avatar" name="Avatar" accept="image/*">
@@ -21,7 +21,7 @@
 		<div class="panel-heading">资料</div>
 		<div class="panel-body">
 			<form id="UserEditForm" name="UserEditForm" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
-				{{ .xsrf_html }}
+				{{ onceformhtml }}
 				<input name="action" type="hidden" value="UpdateUser">
 				<fieldset>
 					<!-- Appended checkbox -->
@@ -92,7 +92,7 @@
 		<div class="panel-heading">密码</div>
 		<div class="panel-body">
 			<form id="UserPasswordForm" name="UserEditForm" method="post" action="{{urlfor "UserController.Edit" ":username" .User.Username}}">
-				{{ .xsrf_html }}
+				{{ onceformhtml }}
 				<input name="action" type="hidden" value="UpdatePassword">
 				<fieldset>
 					<!-- Appended checkbox -->
@@ -189,13 +189,6 @@ $(function() {
 			CurrentPassword:{
 				required: true,
 				minlength: 6,
-				remote: {
-					url: "{{urlfor "UserController.ValidatePassword"|jsescape}}",
-					type: "post",
-					data:{
-						Username : "{{.TheUser.Username|jsescape}}",
-						_xsrf : "{{.xsrf_token}}",
-					},
 				},
 			},
 			Password:{
@@ -211,7 +204,6 @@ $(function() {
 			CurrentPassword:{
 				required: "请输入当前密码",
 				minlength: "密码最短6位",
-				remote: "当前密码错误",
 			},
 			Password:{
 				required: "请输入新密码",
