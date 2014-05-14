@@ -29,6 +29,10 @@ func OnceFormHtml() template.HTML {
 		OnceToken() + "\"/>")
 }
 
+func LoginUrlFor(endpoint string, values ...string) string {
+	return beego.UrlFor("AuthController.Login", ":returnurl", template.URLQueryEscaper(beego.UrlFor(endpoint, values...)))
+}
+
 func init() {
 	// Register template functions.
 	beego.AddFuncMap("loadtimes", loadtimes)
@@ -36,4 +40,5 @@ func init() {
 	beego.AddFuncMap("nl2br", nl2br)
 	beego.AddFuncMap("oncetoken", OnceToken)
 	beego.AddFuncMap("onceformhtml", OnceFormHtml)
+	beego.AddFuncMap("loginurl", LoginUrlFor)
 }
