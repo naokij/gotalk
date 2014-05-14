@@ -20,11 +20,11 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/cache"
-	_ "github.com/astaxie/beego/cache/redis"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/naokij/gotalk/cache/redis"
 	"github.com/naokij/gotalk/filestore"
 	"labix.org/v2/mgo"
 )
