@@ -10,7 +10,7 @@ import (
 
 var (
 	// the collection name of redis for cache adapter.
-	DefaultKey string = "cache"
+	DefaultKey string = "cache:"
 )
 
 // Redis cache adapter.
