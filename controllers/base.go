@@ -102,6 +102,9 @@ func (this *BaseController) LogUserOut() {
 }
 
 func (this *BaseController) Prepare() {
+	if setting.ConfigBroken {
+		this.Abort("500")
+	}
 	// page start time
 	this.Data["PageStartTime"] = time.Now()
 	this.Data["AppName"] = setting.AppName

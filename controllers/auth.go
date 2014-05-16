@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"github.com/naokij/go-sendcloud"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
 	"net/url"
@@ -186,15 +187,25 @@ func (this *AuthController) DoRegister() {
 		return
 	}
 	//通过所有验证
-	beego.Trace(user)
+	actCode, _ := user.GenerateActivateCode()
 	user.SetPassword(form.Password)
 	if err := user.Insert(); err != nil {
 		beego.Error(err)
 		this.Abort("500")
 		return
 	}
+	sub := sendcloud.NewSubstitution()
+	sub.AddTo(user.Email)
+	sub.AddSub("%appname%", setting.AppName)
+	sub.AddSub("%name%", user.Username)
+	sub.AddSub("%url%", setting.AppUrl+beego.UrlFor("AuthController.Activate", ":code", actCode))
+	if err := setting.Sendcloud.SendTemplate("gotalk_register", setting.AppName+"欢迎你", setting.From, setting.FromName, sub); err != nil {
+		beego.Error(err)
+	}
+	this.FlashWrite("notice", fmt.Sprintf("注册成功！欢迎你, %s。建议你再花点时间上传头像、验证电子邮件！", user.Username))
 	this.LogUserIn(&user, false)
-	this.Redirect("/", 302)
+	userEditUrl := beego.UrlFor("UserController.Edit", ":username", user.Username)
+	this.Redirect(userEditUrl, 302)
 	return
 }
 
@@ -230,4 +241,18 @@ func (this *AuthController) ValidateCaptcha() {
 	captchaId := this.GetString("captchaid")
 	this.Data["json"] = setting.Captcha.Verify(captchaId, captcha)
 	this.ServeJson()
+}
+
+func (this *AuthController) Activate() {
+	this.Data["PageTitle"] = fmt.Sprintf("用户激活 | %s", setting.AppName)
+	code := this.Ctx.Input.Param(":code")
+	user := models.User{}
+	if user.VerifyActivateCode(code) {
+		user.IsActive = true
+		user.Update()
+		this.FlashWrite("notice", "谢谢，你的电子邮件已经验证！")
+	} else {
+		this.FlashWrite("error", "糟糕，无法验证你的电子邮件！")
+	}
+	this.Redirect("/", 302)
 }

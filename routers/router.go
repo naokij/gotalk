@@ -20,8 +20,11 @@ func init() {
 	beego.Router("/register/validate-username", authController, "get:ValidateUsername")
 	beego.Router("/register/validate-email", authController, "get:ValidateEmail")
 	beego.Router("/register/validate-captcha", authController, "get:ValidateCaptcha")
+	beego.Router("/activate/:code(.+)", authController, "get:Activate")
+
 	userController := new(controllers.UserController)
 	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")
 	beego.Router("/user/:username(.+)", userController, "get:Profile")
 	beego.Router("/user/validate-password", userController, "post:ValidatePassword")
+
 }

@@ -18,9 +18,10 @@ package models
 import (
 	//"fmt"
 	"code.google.com/p/go-uuid/uuid"
-	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/cache"
 	"github.com/astaxie/beego/orm"
 	"github.com/disintegration/imaging"
 	"github.com/naokij/gotalk/setting"
@@ -158,42 +159,28 @@ func (m *User) VerifyPassword(password string) bool {
 	return false
 }
 
-func (m *User) GenerateActivateCode() string {
-	data := utils.ToStr(m.Id) + m.Email + m.Username + m.Password + m.Salt
-	code := utils.CreateTimeLimitCode(data, activeCodeLife, nil)
-
-	// add tail hex username
-	code += hex.EncodeToString([]byte(m.Username))
-	return code
+func (m *User) GenerateActivateCode() (code string, err error) {
+	code = strings.Replace(uuid.New(), "-", "", -1)
+	if err := setting.Cache.Put("activation:"+code, m.Username, 3600); err != nil {
+		beego.Error("cache", err)
+		return "", err
+	}
+	return code, nil
 }
 
-func (m *User) verifyCodePass1(code string) bool {
-	if len(code) <= utils.TimeLimitCodeLength {
+//验证激活码
+//如果验证通过User对象会变成激活码对应的User
+func (m *User) VerifyActivateCode(code string) bool {
+	usernameFromCache := cache.GetString(setting.Cache.Get("activation:" + code))
+	if usernameFromCache == "" {
 		return false
 	}
-
-	// use tail hex username query user
-	hexStr := code[utils.TimeLimitCodeLength:]
-	if b, err := hex.DecodeString(hexStr); err == nil {
-		if m.Username == string(b) {
-			return true
-		}
+	m.Username = usernameFromCache
+	if err := m.Read("Username"); err != nil {
+		return false
 	}
-
-	return false
-}
-
-func (m *User) VerifyActivateCode(code string) bool {
-
-	if m.verifyCodePass1(code) {
-		// time limit code
-		prefix := code[:utils.TimeLimitCodeLength]
-		data := utils.ToStr(m.Id) + m.Email + m.Username + m.Password + m.Salt
-
-		return utils.VerifyTimeLimitCode(data, activeCodeLife, prefix)
-	}
-
-	return false
+	setting.Cache.Delete("activation:" + code)
+	return true
 }
 
 func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error {

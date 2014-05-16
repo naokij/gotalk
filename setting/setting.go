@@ -24,6 +24,7 @@ import (
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/naokij/go-sendcloud"
 	_ "github.com/naokij/gotalk/cache/redis"
 	"github.com/naokij/gotalk/filestore"
 	"labix.org/v2/mgo"
@@ -47,6 +48,12 @@ var (
 	TmpPath            string
 	RedisHost          string
 	RedisPort          string
+	SendcloudDomain    string
+	SendcloudUser      string
+	SendcloudKey       string
+	From               string
+	FromName           string
+	ConfigBroken       bool
 )
 
 var (
@@ -55,6 +62,7 @@ var (
 	Captcha        *captcha.Captcha
 	AvatarFSM      *filestore.Manager
 	AttachmentFSM  *filestore.Manager
+	Sendcloud      *sendcloud.Client
 )
 
 const (
@@ -81,17 +89,33 @@ func ReadConfig() {
 	XSRFKey = beego.AppConfig.String("security::xsrfkey")
 	RedisHost = beego.AppConfig.String("redis::host")
 	RedisPort = beego.AppConfig.String("redis::port")
+	SendcloudDomain = beego.AppConfig.String("sendcloud::domain")
+	SendcloudUser = beego.AppConfig.String("sendcloud::user")
+	SendcloudKey = beego.AppConfig.String("sendcloud::key")
+	From = beego.AppConfig.String("sendcloud::from")
+	FromName = beego.AppConfig.String("sendcloud::fromname")
 
-	orm.RegisterDriver("mysql", orm.DR_MySQL)
-	orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai")
+	if err := orm.RegisterDriver("mysql", orm.DR_MySQL); err != nil {
+		beego.Error("mysql", err)
+		ConfigBroken = true
+	}
+	if err := orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai"); err != nil {
+		beego.Error("mysql", err)
+		ConfigBroken = true
+	}
 
 	MongodbSession, err = mgo.Dial(MongodbHost)
 	if err != nil {
-		beego.Error(err)
+		beego.Error("mongodb", err)
+		ConfigBroken = true
 	}
 
 	// cache system
 	Cache, err = cache.NewCache("redis", fmt.Sprintf(`{"conn":"%s:%s"}`, RedisHost, RedisPort))
+	if err != nil {
+		beego.Error("cache", err)
+		ConfigBroken = true
+	}
 
 	Captcha = captcha.NewWithFilter("/captcha/", Cache)
 	Captcha.FieldIdName = "captcha-id"
@@ -113,4 +137,8 @@ func ReadConfig() {
 	if err != nil {
 		beego.Error(err)
 	}
+
+	//初始化sendcloud，用来发送邮件
+	Sendcloud = sendcloud.New()
+	Sendcloud.AddDomain(SendcloudDomain, SendcloudUser, SendcloudKey)
 }

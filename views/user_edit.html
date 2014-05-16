@@ -1,14 +1,15 @@
 <div class="col-md-3">
 	<div class="panel">
 		<div class="panel-body text-center">
-			<img src="{{.TheUser.LargeAvatarUrl}}">
+			<img src="{{.TheUser.LargeAvatarUrl}}" class="avatar">
 			<div>
 				<br><br>
 				<form id="UserAvatarForm" name="UserAvatarForm" enctype="multipart/form-data" method="post" action="{{urlfor "UserController.Edit" ":username" .TheUser.Username}}">
 					{{ onceformhtml }}
-					<input name="action" type="hidden" value="UploadAvatar">
+					<input name="action" type="hidden" class="form-control" value="UploadAvatar">
 					<div class="form-group">
 						<input type="file" id="Avatar" name="Avatar" accept="image/*">
+						<p class="help-block">支持JPG、PNG图片</p>
 					</div>
 					<button id="" name="" class="btn btn-block btn-primary">上传头像</button>
 				</form>
@@ -63,13 +64,6 @@
 					<div class="form-group">
 						<label class="control-label" for="Qq">QQ</label>  
 						<input id="Qq" name="Qq" placeholder="QQ号" class="form-control input-md" type="text" value="{{.UserEditForm.Qq}}">
-					</div>
-
-					<div class="form-group">
-						<label class="control-label" for="WeChat">微信</label>
-						<div>
-							<a id="WeChat" href="#" class="btn btn-primary" role="button">微信二维码</a>
-						</div>
 					</div>
 
 					<div class="form-group">

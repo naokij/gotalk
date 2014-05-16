@@ -2,7 +2,7 @@ appname = GoTalk
 httpport = 8080
 runmode = dev
 apphost = localhost:8080
-appurl = http://localhost:8080/
+appurl = http://localhost:8080
 tmppath = /tmp/
 
 [mysql]
@@ -34,3 +34,10 @@ local_path = ./attachments
 store = local
 url = http://localhost:8080/avatars/
 local_path = /Users/jiangle/project/go/src/github.com/naokij/gotalk/avatars/
+
+[sendcloud]
+domain = gotalk.local
+user = postmaster@gotalk.local
+key = key
+from = gotalk@gotalk.local
+fromname = GoTalk

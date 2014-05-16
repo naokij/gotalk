@@ -126,3 +126,6 @@ label.suggest{
 .btn-follow {
   margin-bottom: 10px;
 }
+.avatar{
+  border-radius: 4px;
+}

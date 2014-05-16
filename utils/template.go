@@ -20,7 +20,9 @@ func nl2br(text string) template.HTML {
 //生成防止重复提交token
 func OnceToken() (token string) {
 	token = strings.Replace(uuid.New(), "-", "", -1)
-	setting.Cache.Put("Once_"+token, 1, 86400)
+	if err := setting.Cache.Put("Once_"+token, 1, 86400); err != nil {
+		beego.Error("cache", err)
+	}
 	return token
 }
 

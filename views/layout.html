@@ -48,6 +48,15 @@
     <div id="main" class="container">
 
       <div class="row">
+        {{if .flash.notice}}
+        <div class="col-md-12 alert alert-info">{{.flash.notice}}</div>
+        {{end}}
+        {{if .flash.warning}}
+        <div class="col-md-12 alert alert-warning">{{.flash.warning}}</div>
+        {{end}}
+        {{if .flash.error}}
+        <div class="col-md-12 alert alert-danger">{{.flash.error}}</div>
+        {{end}}
         {{.LayoutContent}}
       </div>
     </div><!-- /.container -->
