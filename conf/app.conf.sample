@@ -41,3 +41,6 @@ user = postmaster@gotalk.local
 key = key
 from = gotalk@gotalk.local
 fromname = GoTalk
+
+[stopforumspam]
+key = key

@@ -136,7 +136,8 @@ func (this *UserController) processUserEditForm(user *models.User) {
 		if err := user.Update(); err != nil {
 			this.Abort("500")
 		}
-		beego.Trace("User info updated!")
+		this.FlashWrite("notice", "资料已更新！")
+		this.Redirect(this.Ctx.Request.RequestURI, 302)
 	}
 }
 
@@ -162,6 +163,8 @@ func (this *UserController) processUserPasswordForm(user *models.User) {
 		if err := user.Update(); err != nil {
 			this.Abort("500")
 		}
+		this.FlashWrite("notice", "密码已更新！")
+		this.Redirect(this.Ctx.Request.RequestURI, 302)
 	}
 }
 
@@ -179,6 +182,8 @@ func (this *UserController) processUploadAvatar(user *models.User) {
 		if err := user.Update("Avatar"); err != nil {
 			this.Abort("500")
 		}
+		this.FlashWrite("notice", "头像已更新！")
+		this.Redirect(this.Ctx.Request.RequestURI, 302)
 	}
 }
 

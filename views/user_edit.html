@@ -113,24 +113,6 @@
 	</div>
 </div>
 
-<div id="avatarModal" class="modal fade">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">修改头像</h4>
-      </div>
-      <div class="modal-body">
-        <img src="{{.User.LargeAvatarUrl}}">
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-        <button type="button" class="btn btn-primary">保存</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
 <script src="/static/js/jquery.validate.min.js"></script>
 <script src="/static/js/additional-methods.min.js"></script>
 <script src="/static/js/jquery.passstrength.min.js"></script>
@@ -147,7 +129,7 @@ $(function() {
 			Avatar: {
 				required :true,
 				extension: "jpeg|jpg|png",
-			}
+			},
 		},
 		messages:{
 			Avatar:{
@@ -165,7 +147,7 @@ $(function() {
 			},
 			Url:{
 				url: true,
-			}
+			},
 		},
 		messages: {
 			Email: {
@@ -183,7 +165,6 @@ $(function() {
 			CurrentPassword:{
 				required: true,
 				minlength: 6,
-				},
 			},
 			Password:{
 				required: true,
