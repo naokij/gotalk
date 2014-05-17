@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"github.com/naokij/GoStopForumSpam/stopforumspam"
 	"github.com/naokij/go-sendcloud"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
@@ -248,11 +249,31 @@ func (this *AuthController) Activate() {
 	code := this.Ctx.Input.Param(":code")
 	user := models.User{}
 	if user.VerifyActivateCode(code) {
-		user.IsActive = true
-		user.Update()
-		this.FlashWrite("notice", "谢谢，你的电子邮件已经验证！")
+		if this.IsStopForumSpamListed(&user) {
+			this.FlashWrite("error", "由于你的ip或者电子邮件曾用来发广告，无法为你激活！")
+		} else {
+			user.IsActive = true
+			user.Update()
+			this.FlashWrite("notice", "谢谢，你的电子邮件已经验证！")
+		}
 	} else {
 		this.FlashWrite("error", "糟糕，无法验证你的电子邮件！")
 	}
 	this.Redirect("/", 302)
+}
+
+func (this *AuthController) IsStopForumSpamListed(user *models.User) bool {
+	searchData := stopforumspam.SearchData{}
+	if beego.RunMode != "dev" {
+		searchData.Ip = this.Ctx.Request.RemoteAddr
+	}
+	searchData.Email = user.Email
+	resp, err := setting.StopForumSpam.Search(searchData)
+	if err != nil {
+		return false
+	}
+	if resp.Ip.Appears > 0 || resp.Email.Appears > 0 {
+		return true
+	}
+	return false
 }

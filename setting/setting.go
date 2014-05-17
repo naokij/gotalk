@@ -24,6 +24,7 @@ import (
 	_ "github.com/astaxie/beego/session/redis"
 	"github.com/astaxie/beego/utils/captcha"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/naokij/GoStopForumSpam/stopforumspam"
 	"github.com/naokij/go-sendcloud"
 	_ "github.com/naokij/gotalk/cache/redis"
 	"github.com/naokij/gotalk/filestore"
@@ -63,6 +64,7 @@ var (
 	AvatarFSM      *filestore.Manager
 	AttachmentFSM  *filestore.Manager
 	Sendcloud      *sendcloud.Client
+	StopForumSpam  *stopforumspam.Client
 )
 
 const (
@@ -141,4 +143,6 @@ func ReadConfig() {
 	//初始化sendcloud，用来发送邮件
 	Sendcloud = sendcloud.New()
 	Sendcloud.AddDomain(SendcloudDomain, SendcloudUser, SendcloudKey)
+
+	StopForumSpam = stopforumspam.New(beego.AppConfig.String("stopforumspam::key"))
 }
