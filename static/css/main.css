@@ -129,3 +129,6 @@ label.suggest{
 .avatar{
   border-radius: 4px;
 }
+.social-login-icons img{
+  width: 40px;
+}

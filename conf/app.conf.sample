@@ -20,10 +20,8 @@ host = 127.0.0.1
 port = 6379
 
 [security]
-secret_key = yoursecretkey
 cookieusername = natural
 cookieremembername = water
-xsrfkey = wyDhNi5em2r3B53
 
 [attachment]
 store = local
@@ -44,3 +42,13 @@ fromname = GoTalk
 
 [stopforumspam]
 key = key
+
+[oauth]
+weibo_client_id = your_client_id
+weibo_client_secret = your_client_secret
+
+qq_client_id = your_client_id
+qq_client_secret = your_client_secret
+
+github_client_id = your_client_id
+github_client_secret = your_client_secret

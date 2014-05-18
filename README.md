@@ -5,6 +5,7 @@
 *  github.com/disintegration/imaging
 *  github.com/naokij/go-sendcloud
 *  github.com/naokij/GoStopForumSpam
+*  github.com/beego/social-auth
 
 
 ###uuid

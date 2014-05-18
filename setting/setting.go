@@ -32,29 +32,49 @@ import (
 )
 
 var (
-	AppName            string
-	AppHost            string
-	AppUrl             string
-	AppLogo            string
-	SecretKey          string
+	AppName string
+	AppHost string
+	AppUrl  string
+	AppLogo string
+	TmpPath string
+)
+
+var (
 	CookieUserName     string
 	CookieRememberName string
-	MongodbHost        string
-	MongodbName        string
-	MySQLHost          string
-	MySQLUser          string
-	MySQLPassword      string
-	MySQLDB            string
-	XSRFKey            string
-	TmpPath            string
-	RedisHost          string
-	RedisPort          string
-	SendcloudDomain    string
-	SendcloudUser      string
-	SendcloudKey       string
-	From               string
-	FromName           string
-	ConfigBroken       bool
+)
+
+var (
+	MongodbHost   string
+	MongodbName   string
+	MySQLHost     string
+	MySQLUser     string
+	MySQLPassword string
+	MySQLDB       string
+	RedisHost     string
+	RedisPort     string
+)
+
+var (
+	SendcloudDomain string
+	SendcloudUser   string
+	SendcloudKey    string
+	From            string
+	FromName        string
+)
+
+var (
+	// OAuth
+	GithubClientId     string
+	GithubClientSecret string
+	WeiboClientId      string
+	WeiboClientSecret  string
+	QQClientId         string
+	QQClientSecret     string
+)
+
+var (
+	ConfigBroken bool
 )
 
 var (
@@ -87,8 +107,6 @@ func ReadConfig() {
 	MySQLDB = beego.AppConfig.String("mysql::db")
 	MongodbHost = beego.AppConfig.String("mongodb::host")
 	MongodbName = beego.AppConfig.String("mongodb::name")
-	SecretKey = beego.AppConfig.String("security::secret_key")
-	XSRFKey = beego.AppConfig.String("security::xsrfkey")
 	RedisHost = beego.AppConfig.String("redis::host")
 	RedisPort = beego.AppConfig.String("redis::port")
 	SendcloudDomain = beego.AppConfig.String("sendcloud::domain")
@@ -143,6 +161,15 @@ func ReadConfig() {
 	//初始化sendcloud，用来发送邮件
 	Sendcloud = sendcloud.New()
 	Sendcloud.AddDomain(SendcloudDomain, SendcloudUser, SendcloudKey)
-
+	//StopForumSpam
 	StopForumSpam = stopforumspam.New(beego.AppConfig.String("stopforumspam::key"))
+
+	//社交帐号登录
+	GithubClientId = beego.AppConfig.String("oauth::github_client_id")
+	GithubClientSecret = beego.AppConfig.String("oauth::github_client_secret")
+	QQClientId = beego.AppConfig.String("oauth::qq_client_id")
+	QQClientSecret = beego.AppConfig.String("oauth::qq_client_secret")
+	WeiboClientId = beego.AppConfig.String("oauth::weibo_client_id")
+	WeiboClientSecret = beego.AppConfig.String("oauth::weibo_client_secret")
+
 }

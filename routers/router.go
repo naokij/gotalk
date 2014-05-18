@@ -12,6 +12,8 @@ func init() {
 	beego.Errorhandler("Once", controllers.ErrorOnce)
 
 	beego.Router("/", &controllers.MainController{})
+
+	//登录
 	authController := new(controllers.AuthController)
 	beego.Router("/login", authController, "get:Login;post:DoLogin")
 	beego.Router("/login/:returnurl(.+)", authController, "get:Login")
@@ -20,7 +22,12 @@ func init() {
 	beego.Router("/register/validate-username", authController, "get:ValidateUsername")
 	beego.Router("/register/validate-email", authController, "get:ValidateEmail")
 	beego.Router("/register/validate-captcha", authController, "get:ValidateCaptcha")
-	beego.Router("/activate/:code(.+)", authController, "get:Activate")
+	beego.Router("/activate/:code(([0-9a-zA-Z]+))", authController, "get:Activate")
+	//社交帐号登录
+	beego.AddFilter("/login/:/access", "BeforeRouter", controllers.OAuthAccess)
+	beego.AddFilter("/login/:", "BeforeRouter", controllers.OAuthRedirect)
+	socialAuthController := new(controllers.SocialAuthController)
+	beego.Router("/register/connect", socialAuthController, "get:Connect;post:DoConnect")
 
 	userController := new(controllers.UserController)
 	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")

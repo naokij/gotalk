@@ -21,6 +21,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/naokij/gotalk/setting"
 	//"github.com/naokij/gotalk/models"
+	"github.com/naokij/gotalk/controllers"
 	_ "github.com/naokij/gotalk/routers"
 )
 
@@ -30,6 +31,7 @@ func init() {
 
 func main() {
 	setting.ReadConfig()
+	controllers.SocialInit()
 	beego.EnableAdmin = true
 	beego.SetStaticPath("/static", "static")
 	beego.SetStaticPath("/avatars", "avatars")

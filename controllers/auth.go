@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/validation"
 	"github.com/naokij/GoStopForumSpam/stopforumspam"
 	"github.com/naokij/go-sendcloud"
@@ -119,12 +120,7 @@ func (this *AuthController) DoLogin() {
 		remember = true
 	}
 	this.LogUserIn(&user, remember)
-	if returnUrl, ok := this.GetSession("ReturnUrl").(string); returnUrl != "" && ok {
-		this.DelSession("ReturnUrl")
-		this.Redirect(returnUrl, 302)
-	} else {
-		this.Redirect("/", 302)
-	}
+	this.Redirect(GetLoginRedirectUrl(this.Ctx), 302)
 	return
 }
 
@@ -276,4 +272,14 @@ func (this *AuthController) IsStopForumSpamListed(user *models.User) bool {
 		return true
 	}
 	return false
+}
+
+func GetLoginRedirectUrl(ctx *context.Context) (returnUrl string) {
+	var ok bool
+	if returnUrl, ok = ctx.Input.CruSession.Get("ReturnUrl").(string); returnUrl != "" && ok {
+		ctx.Input.CruSession.Delete("ReturnUrl")
+	} else {
+		returnUrl = "/"
+	}
+	return returnUrl
 }
