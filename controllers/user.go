@@ -21,12 +21,14 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
-
+	"github.com/naokij/go-sendcloud"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
+	"time"
 )
 
 type UserEditForm struct {
+	Username    string `form:"Username,text"valid:"Required"`
 	Email       string `form:"Email,text"valid:"Required;Email;"`
 	PublicEmail bool   `form:"PublicEmail,checkbox""`
 	Nickname    string `form:"Nickname,text"`
@@ -53,8 +55,8 @@ type UserController struct {
 func (this *UserController) Profile() {
 	this.Layout = "layout.html"
 	this.TplNames = "user_profile.html"
-	user := models.User{Username: this.Ctx.Input.Param(":username")}
-	if err := user.Read("Username"); err != nil {
+	user, err := this.getUserFromRequest()
+	if err != nil {
 		this.Abort("404")
 	}
 	this.Data["TheUser"] = &user
@@ -68,7 +70,10 @@ func (this *UserController) Edit() {
 	//获取用户，并且判断是否有权限执行此操作
 	user, err := this.getUserFromRequest()
 	if err != nil {
-		this.Abort(err.Error())
+		this.Abort("404")
+	}
+	if !this.canEdit(user) {
+		this.Abort("403")
 	}
 	if this.Ctx.Input.IsPost() {
 		action := this.GetString("action")
@@ -93,18 +98,21 @@ func (this *UserController) getUserFromRequest() (user models.User, err error) {
 	if errRead := user.Read("Username"); errRead != nil {
 		err = errors.New("404")
 	}
-	if !this.IsLogin {
-		err = errors.New("403")
-		beego.Trace("Not logged in, can not edit user info.")
-	} else if user.Id != this.User.Id && !this.User.IsAdmin {
-		beego.Trace("Can't edit this user, not owner or admin!")
-		err = errors.New("403")
-	}
 	return user, err
+}
+
+func (this *UserController) canEdit(user models.User) bool {
+	if !this.IsLogin {
+		return false
+	} else if user.Id != this.User.Id && !this.User.IsAdmin {
+		return false
+	}
+	return true
 }
 
 func (this *UserController) processUserEditForm(user *models.User) {
 	valid := validation.Validation{}
+	var usernameChanged, emailChanged bool
 	userEditForm := UserEditForm{}
 	if err := this.ParseForm(&userEditForm); err != nil {
 		beego.Error(err)
@@ -113,6 +121,27 @@ func (this *UserController) processUserEditForm(user *models.User) {
 	if err != nil {
 		beego.Error(err)
 		this.Abort("400")
+	}
+	if user.Username != userEditForm.Username {
+		usernameChanged = true
+		if time.Since(user.Created).Hours() <= 720 {
+			tmpUser := models.User{Username: userEditForm.Username}
+			if err := tmpUser.ValidUsername(); err != nil {
+				valid.SetError("Username", err.Error())
+			}
+			if tmpUser.Read("Username") == nil {
+				valid.SetError("Username", "用户名已经被使用")
+			}
+		} else {
+			valid.SetError("Username", "注册超过30天后无法修改用户名")
+		}
+	}
+	if user.Email != userEditForm.Email {
+		emailChanged = true
+		tmpUser := models.User{Email: userEditForm.Email}
+		if err := tmpUser.Read("Email"); err == nil {
+			valid.SetError("Email", "电子邮件地址已经被使用")
+		}
 	}
 	user.Url = userEditForm.Url
 	if err := user.ValidateUrl(); user.Url != "" && err != nil {
@@ -123,7 +152,13 @@ func (this *UserController) processUserEditForm(user *models.User) {
 		this.Data["UserEditFormValidErrors"] = valid.Errors
 		beego.Trace(fmt.Sprint(valid.Errors))
 	} else {
-		user.Email = userEditForm.Email
+		if usernameChanged {
+			user.Username = userEditForm.Username
+		}
+		if emailChanged {
+			user.Email = userEditForm.Email
+			user.IsActive = false
+		}
 		user.PublicEmail = userEditForm.PublicEmail
 		user.Nickname = userEditForm.Nickname
 		user.Info = userEditForm.Info
@@ -136,8 +171,18 @@ func (this *UserController) processUserEditForm(user *models.User) {
 		if err := user.Update(); err != nil {
 			this.Abort("500")
 		}
-		this.FlashWrite("notice", "资料已更新！")
-		this.Redirect(this.Ctx.Request.RequestURI, 302)
+		if usernameChanged && this.User.Id == user.Id {
+			this.LogUserIn(user, false)
+		}
+		if emailChanged {
+			//发验证邮件
+			this.resendValidation(user)
+			this.FlashWrite("notice", fmt.Sprintf("资料已经更新。由于修改了Email地址，我们向%s发送了一封验证邮件，请重新验证。", user.Email))
+		} else {
+			this.FlashWrite("notice", "资料已更新！")
+		}
+		redirectUrl := beego.UrlFor("UserController.Edit", ":username", user.Username)
+		this.Redirect(redirectUrl, 302)
 	}
 }
 
@@ -187,19 +232,37 @@ func (this *UserController) processUploadAvatar(user *models.User) {
 	}
 }
 
-func (this *UserController) ValidatePassword() {
-	username := this.GetString("Username")
-	currentPassword := this.GetString("CurrentPassword")
-	user := models.User{Username: username}
-	if err := user.Read("Username"); err != nil {
-		this.Data["json"] = false
-		this.ServeJson()
-		return
+func (this *UserController) resendValidation(user *models.User) {
+	//发验证邮件
+	sub := sendcloud.NewSubstitution()
+	sub.AddTo(user.Email)
+	sub.AddSub("%name%", user.Username)
+	sub.AddSub("%appname%", setting.AppName)
+	code, err := user.GenerateActivateCode()
+	if err != nil {
+		beego.Trace(err)
+		this.Abort("500")
 	}
-	if user.VerifyPassword(currentPassword) {
-		this.Data["json"] = true
-	} else {
-		this.Data["json"] = false
+	sub.AddSub("%url%", setting.AppUrl+beego.UrlFor("AuthController.Activate", ":code", code))
+	if err := setting.Sendcloud.SendTemplate("gotalk_revalidate", setting.AppName+"邮件验证", setting.From, setting.FromName, sub); err != nil {
+		beego.Error(err)
 	}
-	this.ServeJson()
+}
+
+func (this *UserController) ResendValidation() {
+	//获取用户，并且判断是否有权限执行此操作
+	user, err := this.getUserFromRequest()
+	if err != nil {
+		this.Abort("404")
+	}
+	if !this.canEdit(user) {
+		this.Abort("403")
+	}
+	this.resendValidation(&user)
+	this.FlashWrite("notice", fmt.Sprintf("验证邮件已经发送，请登录%s进行验证。", user.Email))
+	redirectUrl := beego.UrlFor("UserController.Edit", ":username", user.Username)
+	this.Redirect(redirectUrl, 302)
+}
+func (this *UserController) ChangeUsername() {
+
 }

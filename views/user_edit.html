@@ -1,3 +1,10 @@
+{{if .TheUser.IsActive}}
+{{else}}
+<div class="alert alert-warning alert-dismissable">
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <strong>提醒！</strong> 你的电子邮件地址{{.TheUser.Email}}尚未验证。如果未收到验证邮件，请检查垃圾箱或者<a href="{{urlfor "UserController.ResendValidation" ":username" .TheUser.Username}}" class=".alert-link">重新验证</a>。
+</div>
+{{end}}
 <div class="col-md-3">
 	<div class="panel">
 		<div class="panel-body text-center">
@@ -25,7 +32,11 @@
 				{{ onceformhtml }}
 				<input name="action" type="hidden" value="UpdateUser">
 				<fieldset>
-					<!-- Appended checkbox -->
+					<div class="form-group">
+						<label class="control-label" for="Username">用户名</label>  
+						<input id="Username" name="Username" placeholder="用户名" class="form-control input-md" type="text" value="{{.UserEditForm.Username}}">
+						<p class="help-block">注册30天内都可以修改用户名</p>
+					</div>
 					<div class="form-group">
 						<label class="control-label" for="Email">电子邮件</label>
 						<div class="input-group">
@@ -34,6 +45,7 @@
 								<input id="PublicEmail" name="PublicEmail" type="checkbox" value="1" {{if .UserEditForm.PublicEmail}}checked{{end}}> 公开     
 							</span>
 						</div>
+						<p class="help-block">修改Email后需要重新验证</p>
 					</div>
 
 					<div class="form-group">
