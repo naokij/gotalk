@@ -263,6 +263,3 @@ func (this *UserController) ResendValidation() {
 	redirectUrl := beego.UrlFor("UserController.Edit", ":username", user.Username)
 	this.Redirect(redirectUrl, 302)
 }
-func (this *UserController) ChangeUsername() {
-
-}
