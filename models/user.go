@@ -171,6 +171,18 @@ func (m *User) GenerateActivateCode() (code string, err error) {
 //验证激活码
 //如果验证通过User对象会变成激活码对应的User
 func (m *User) VerifyActivateCode(code string) bool {
+	b := m.TestActivateCode(code)
+	if b {
+		if err := m.ConsumeActivateCode(code); err != nil {
+			beego.Error(err)
+		}
+	}
+	return b
+}
+
+//测试激活码
+//测试完后不会删除
+func (m *User) TestActivateCode(code string) bool {
 	usernameFromCache := cache.GetString(setting.Cache.Get("activation:" + code))
 	if usernameFromCache == "" {
 		return false
@@ -179,8 +191,12 @@ func (m *User) VerifyActivateCode(code string) bool {
 	if err := m.Read("Username"); err != nil {
 		return false
 	}
-	setting.Cache.Delete("activation:" + code)
 	return true
+}
+
+//使用激活码
+func (m *User) ConsumeActivateCode(code string) error {
+	return setting.Cache.Delete("activation:" + code)
 }
 
 func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error {

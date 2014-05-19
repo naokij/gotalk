@@ -45,6 +45,15 @@ type RegisterForm struct {
 	Captcha         string `form:"captcha,text"valid:"Required"`
 }
 
+type ForgetPasswordForm struct {
+	Email string `form:"Email"valid:"Required;Email"`
+}
+
+type ResetPasswordForm struct {
+	Password        string `form:"Password,password"valid:"Required;MinSize(6);"`
+	PasswordConfirm string `form:"PasswordConfirm,password"valid:"Required;"`
+}
+
 //登录控制器
 type AuthController struct {
 	BaseController
@@ -282,4 +291,86 @@ func GetLoginRedirectUrl(ctx *context.Context) (returnUrl string) {
 		returnUrl = "/"
 	}
 	return returnUrl
+}
+
+//重设密码
+func (this *AuthController) ResetPassword() {
+	code := this.Ctx.Input.Param(":code")
+	user := models.User{}
+	if !user.TestActivateCode(code) {
+		this.Abort("403")
+	}
+	this.Data["code"] = code
+	this.Data["PageTitle"] = fmt.Sprintf("重设密码 | %s", setting.AppName)
+	this.Layout = "layout.html"
+	this.TplNames = "reset-password.html"
+	valid := validation.Validation{}
+	form := ResetPasswordForm{}
+	if this.Ctx.Request.Method == "POST" {
+		if err := this.ParseForm(&form); err != nil {
+			beego.Error(err)
+		}
+		b, err := valid.Valid(form)
+		if err != nil {
+			beego.Error(err)
+		}
+		if b {
+			user.SetPassword(form.Password)
+			if err := user.Update(); err != nil {
+				beego.Error(err)
+				this.Abort("500")
+			}
+			user.ConsumeActivateCode(code)
+			this.FlashWrite("notice", "新密码已经生效，请重新登录！")
+			this.Redirect("/login", 302)
+		} else {
+			this.Data["HasError"] = true
+			this.Data["errors"] = valid.Errors
+		}
+	}
+}
+
+//输入email，发送重设密码邮件
+func (this *AuthController) ForgetPassword() {
+	this.Data["PageTitle"] = fmt.Sprintf("忘记密码 | %s", setting.AppName)
+	this.Layout = "layout.html"
+	this.TplNames = "forget-password.html"
+	valid := validation.Validation{}
+	form := ForgetPasswordForm{}
+	if this.Ctx.Request.Method == "POST" {
+		if err := this.ParseForm(&form); err != nil {
+			beego.Error(err)
+		}
+		_, err := valid.Valid(form)
+		if err != nil {
+			beego.Error(err)
+		}
+		user := models.User{Email: form.Email}
+		if err := user.Read("Email"); err != nil {
+			beego.Trace(user)
+			beego.Trace(form)
+			valid.SetError("Email", "此电子邮件并未注册")
+		}
+		beego.Trace(valid.Errors)
+		if len(valid.Errors) == 0 {
+			//发送忘记密码邮件
+			code, err := user.GenerateActivateCode()
+			if err != nil {
+				this.Abort("500")
+			}
+			sub := sendcloud.NewSubstitution()
+			sub.AddTo(user.Email)
+			sub.AddSub("%appname%", setting.AppName)
+			sub.AddSub("%name%", user.Username)
+			sub.AddSub("%url%", setting.AppUrl+beego.UrlFor("AuthController.ResetPassword", ":code", code))
+			if err := setting.Sendcloud.SendTemplate("gotalk_password", setting.AppName+"忘记密码", setting.From, setting.FromName, sub); err != nil {
+				beego.Error(err)
+			}
+			this.FlashWrite("notice", fmt.Sprintf("重设密码的方法已经发到%s。请查收！", user.Email))
+			this.Redirect("/", 302)
+		} else {
+			this.Data["HasError"] = true
+			this.Data["errors"] = valid.Errors
+		}
+	}
 }
