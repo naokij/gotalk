@@ -1,10 +1,10 @@
 {{if .TheUser.IsActive}}
-{{else}}
+{{else}}{{if .flash.notice}}{{else}}
 <div class="alert alert-warning alert-dismissable">
   <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
   <strong>提醒！</strong> 你的电子邮件地址{{.TheUser.Email}}尚未验证。如果未收到验证邮件，请检查垃圾箱或者<a href="{{urlfor "UserController.ResendValidation" ":username" .TheUser.Username}}" class=".alert-link">重新验证</a>。
 </div>
-{{end}}
+{{end}}{{end}}
 <div class="col-md-3">
 	<div class="panel">
 		<div class="panel-body text-center">
