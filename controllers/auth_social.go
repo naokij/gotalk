@@ -17,13 +17,13 @@ limitations under the License.
 package controllers
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	"github.com/beego/social-auth"
-	"github.com/beego/social-auth/apps"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
+	"github.com/naokij/social-auth"
+	"github.com/naokij/social-auth/apps"
 )
 
 var (
@@ -84,18 +84,52 @@ func OAuthAccess(ctx *context.Context) {
 }
 
 func (this *SocialAuthController) Connect() {
-
+	this.Data["PageTitle"] = fmt.Sprintf("社交帐号登录 | %s", setting.AppName)
+	this.Layout = "layout.html"
+	this.TplNames = "social-login.html"
+	if this.IsLogin {
+		this.Redirect("/", 302)
+	}
+	//检查社交帐号登录是否正常
+	var socialType social.SocialType
+	if !this.canConnect(&socialType) {
+		beego.Error(this.GetString("error_description"))
+		this.Abort("500")
+		this.Redirect(SocialAuth.LoginURL, 302)
+		return
+	}
+	p, _ := social.GetProviderByType(socialType)
+	if p == nil {
+		beego.Error("unknown provider")
+	}
+	var socialUserInfo social.UserInfo
+	var ok bool
+	if socialUserInfo, ok = this.GetSession("social_user_info").(social.UserInfo); !ok {
+		beego.Error("error getting social_user_info session")
+		this.Abort("500")
+	}
+	this.Data["SocialType"] = p.GetName()
+	this.Data["SocialUser"] = socialUserInfo
 }
 
 func (this *SocialAuthController) DoConnect() {
 
 }
 
+func (this *SocialAuthController) canConnect(socialType *social.SocialType) bool {
+	if st, ok := SocialAuth.ReadyConnect(this.Ctx); !ok {
+		return false
+	} else {
+		*socialType = st
+	}
+	return true
+}
+
 func SocialInit() {
-	social.DefaultAppUrl = setting.AppUrl
+	social.DefaultAppUrl = setting.AppUrl + "/"
 	SocialAuth = social.NewSocial("/login/", SocialAuther)
-	SocialAuth.ConnectSuccessURL = "/settings/profile"
-	SocialAuth.ConnectFailedURL = "/settings/profile"
+	SocialAuth.ConnectSuccessURL = "/"
+	SocialAuth.ConnectFailedURL = "/"
 	SocialAuth.ConnectRegisterURL = "/register/connect"
 	SocialAuth.LoginURL = "/login"
 	WeiboAuth = apps.NewWeibo(setting.WeiboClientId, setting.WeiboClientSecret)

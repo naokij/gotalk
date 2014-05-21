@@ -60,6 +60,9 @@ type AuthController struct {
 }
 
 func (this *AuthController) Login() {
+	if this.IsLogin {
+		this.Redirect("/", 302)
+	}
 	returnUrl := this.Ctx.Input.Param(":returnurl")
 	if returnUrl != "" {
 		u, err := url.Parse(returnUrl)
@@ -82,9 +85,11 @@ func (this *AuthController) loginPageWithErrors(form LoginForm, errors []*valida
 	this.Data["form"] = form
 	this.Data["errors"] = errors
 	this.Data["HasError"] = true
-	beego.Trace(errors[0])
 }
 func (this *AuthController) DoLogin() {
+	if this.IsLogin {
+		this.Redirect("/", 302)
+	}
 	valid := validation.Validation{}
 	form := LoginForm{}
 	if err := this.ParseForm(&form); err != nil {
