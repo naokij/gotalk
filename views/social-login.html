@@ -1,28 +1,165 @@
-<div class="col-md-3">
+<div class="alert alert-success">欢迎你{{.SocialUserLogin}}，请完善注册信息或者将你的{{.SocialType}}账户与{{.AppName}}账户关联</div>
+<div class="col-md-2">
 	<div class="panel">
 		<div class="panel-body text-center">
-			<img src="{{.SocialUser.GetAvatarUrl}}" width="220" class="avatar">
-			<h3>{{.SocialUser.GetLogin}}</h3>
+			<img src="{{.SocialUserAvatarUrl}}" width="120" class="avatar">
+			<h3>{{.SocialUserLogin}}</h3>
 		</div>
 	</div>
 </div>
 
-<div class="col-md-9">
+<div class="col-md-5">
 	<div class="panel panel-default">
-		<div class="panel-heading">请完善{{.SocialType}}帐号登录</div>
+		<div class="panel-heading">完善注册信息</div>
 		<div class="panel-body">
-			<form action="/login" method="post" id="loginForm" class="form-signin" role="form">
+			<form action="/register/connect" method="post" id="registerForm" class="form-signin" role="form">
 				{{ onceformhtml}}
-				<div class="form-group"><label class="control-label">用户名或电子邮件</label><input type="text" name="username" class="form-control" placeholder="用户名或电子邮件" required autofocus value="{{.form.Username}}"></div>
-				<div class="form-group"><label class="control-label">密码</label><input type="password" name="password" class="form-control" placeholder="密码" required value="{{.form.Password}}"></div>
-				<div class="form-group"><label class="checkbox">
-					<input type="checkbox" name="remember" value="remember-me"> 记住登录
-				</label></div>
-				<div class="form-group"><button class="btn btn-block btn-lg btn-primary" type="submit">登录</button></div>
+				<input type="hidden" name="action" value="Register">
+				<div class="form-group"><label class="control-label">用户名</label><input type="text" name="Username" class="form-control" placeholder="用户名" autofocus value="{{.RegisterForm.Username}}" autocomplete="off"></div>
+				<div class="form-group"><label class="control-label">电子邮件</label><input id="Email" type="text" name="Email" class="form-control" placeholder="电子邮件" value="{{.RegisterForm.Email}}" autocomplete="off"></div>
+				<div class="form-group"><label class="control-label">密码</label><input id="Password" type="password" name="Password" class="form-control" placeholder="密码" value="{{.RegisterForm.Password}}"></div>
+				<div class="form-group"><input type="password" name="PasswordConfirm" class="form-control" placeholder="重复密码" value="{{.RegisterForm.PasswordConfirm}}"></div>
+				<div class="form-group"><button class="btn btn-block btn-lg btn-primary" type="submit">注册</button></div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="col-md-5">
+	<div class="panel panel-default">
+		<div class="panel-heading">关联现有{{.AppName}}账户</div>
+		<div class="panel-body">
+			<form action="/register/connect" method="post" id="loginForm" class="form-signin" role="form">
+				{{ onceformhtml}}
+				<input type="hidden" name="action" value="Login">
+				<div class="form-group"><label class="control-label">用户名或电子邮件</label><input type="text" name="Username" class="form-control" placeholder="用户名或电子邮件" required autofocus value="{{.LoginForm.Username}}"></div>
+				<div class="form-group"><label class="control-label">密码</label><input type="password" name="Password" class="form-control" placeholder="密码" required value="{{.LoginForm.Password}}"></div>
+				<div class="form-group"><button class="btn btn-block btn-lg btn-primary" type="submit">登录并关联</button></div>
 				<div class="form-group"><a href="/forget-password">忘记密码</a></div>
 			</form>
 		</div>
 	</div>
 </div>
 
+<script src="/static/js/jquery.validate.min.js"></script>
+<script src="/static/js/additional-methods.min.js"></script>
+<script src="/static/js/jquery.passstrength.min.js"></script>
+<script src="/static/js/jquery.email-autocomplete.min.js"></script>
+<script src="/static/js/mailcheck.min.js"></script>
 
+<script>
+$(function() {
+	$.validator.setDefaults({
+		errorClass: "has-error",
+	});
+	var validatorForRegisterForm = $("#registerForm").validate({
+		onkeyup:false,
+		rules: {
+			Username: {
+				required: true,
+				remote: "/register/validate-username",
+			},
+			Password: {
+				required: true,
+				minlength: 6,
+			},
+			PasswordConfirm: {
+				equalTo: "#Password",
+				required: true,
+			},
+			Email: {
+				required: true,
+				email: true,
+				remote: "/register/validate-email"
+			},
+		},
+		messages: {
+			Username: {
+				required: "请输入用户名",
+			},
+			Password: {
+				required: "请输入密码",
+				minlength: "密码最短6位",
+			},
+			PasswordConfirm: {
+				required: "请再次输入密码做确认",
+				equalTo: "两次密码不一致",
+			},
+			Email: {
+				required: "请输入电子邮件",
+				email: "请输入正确的电子邮件地址",
+			},
+		},
+	});
+	$('#Password').passStrengthify({
+		minimum: 6,
+		labels: {
+			tooShort: '密码太短',
+			passwordStrength: '密码强度'
+		}});
+	var domains = ["163.com","126.com","qq.com","sina.com","vip.qq.com","sina.cn","hotmail.com","gmail.com","sohu.com","139.com","wo.com.cn","189.com","21cn.com","me.com","live.com","mac.com","yahoo.com","outlook.com","icloud.com","mail.com"];
+	var tlds = ["com","net","org","info","edu","cn","com.cn"]
+	$("#Email").emailautocomplete({
+	  domains: domains,
+	});
+	$('#Email').on('blur', function() {
+	  $(this).mailcheck({
+	    domains: domains,
+	    topLevelDomains: tlds,
+	    suggested: function(element, suggestion) {
+	      var emailInput = $("#Email");
+	      if ($("#suggest-label").length==0)
+	      {
+	      	var label = $("<label></label>");
+	      	label.attr("id","suggest-label");
+	      	label.addClass("suggest");
+	      	label.html('你要输入的是<a id="suggested-email" href="javascript:void(0);">'+suggestion.full+'</a>么？').insertAfter(emailInput);
+	      }
+	      else{
+	      	$("#suggested-email").text(suggestion.full)
+	      }
+	      $("#suggested-email").click(function(){
+	      	emailInput.val(suggestion.full);
+	      	$("#suggest-label").remove();
+	      })
+	    },
+	    empty: function(element) {
+	      // callback code
+	    }
+	  });
+	});
+	var validatorForLoginForm = $("#loginForm").validate({
+		rules: {
+			Username:{
+				required: true,
+			},
+			Password:{
+				required: true,
+			},
+		},
+		messages:{
+			Username:{
+				required: "请输入用户名或电子邮件",
+			},
+			Password:{
+				required: "请输入密码",
+			},
+		}
+	});
+	//显示服务端错误信息
+	{{if .LoginFormErrors}}
+	validatorForLoginForm.showErrors({
+		{{range .LoginFormErrors}}
+		"{{.Field|jsescape}}": "{{.Message|jsescape}}",
+		{{end}}
+	});
+	{{end}}
+	{{if .RegisterFormErrors}}
+	validatorForRegisterForm.showErrors({
+		{{range .RegisterFormErrors}}
+		"{{.Field|jsescape}}": "{{.Message|jsescape}}",
+		{{end}}
+	});
+	{{end}}
+});
+</script>

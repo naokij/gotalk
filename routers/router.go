@@ -29,7 +29,7 @@ func init() {
 	beego.AddFilter("/login/:/access", "BeforeRouter", controllers.OAuthAccess)
 	beego.AddFilter("/login/:", "BeforeRouter", controllers.OAuthRedirect)
 	socialAuthController := new(controllers.SocialAuthController)
-	beego.Router("/register/connect", socialAuthController, "get:Connect;post:DoConnect")
+	beego.Router("/register/connect", socialAuthController, "get:Connect;post:Connect")
 
 	userController := new(controllers.UserController)
 	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")

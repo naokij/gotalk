@@ -222,6 +222,9 @@ func (this *AuthController) DoRegister() {
 
 func (this *AuthController) ValidateUsername() {
 	username := this.GetString("username")
+	if username == "" {
+		username = this.GetString("Username")
+	}
 	user := models.User{Username: username}
 	if err := user.ValidUsername(); err != nil {
 		this.Data["json"] = err.Error()
@@ -238,6 +241,9 @@ func (this *AuthController) ValidateUsername() {
 
 func (this *AuthController) ValidateEmail() {
 	email := this.GetString("email")
+	if email == "" {
+		email = this.GetString("Email")
+	}
 	user := models.User{Email: email}
 	if user.Read("Email") == nil {
 		this.Data["json"] = "已被使用，请直接使用此电邮登录"

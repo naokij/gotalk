@@ -200,12 +200,12 @@ func (m *User) ConsumeActivateCode(code string) error {
 }
 
 func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error {
+	var img image.Image
+	var err error
 	ext := strings.ToLower(filepath.Ext(filename))
 	if ext != ".jpg" && ext != ".jpeg" && ext != "png" {
 		return errors.New("只允许jpg, png类型的图片")
 	}
-	var img image.Image
-	var err error
 	switch ext {
 	case ".jpg", ".jpeg":
 		img, err = jpeg.Decode(avatarFile)
