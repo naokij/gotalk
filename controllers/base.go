@@ -105,6 +105,8 @@ func (this *BaseController) Prepare() {
 	if setting.ConfigBroken {
 		this.Abort("500")
 	}
+	this.checkDeny()
+
 	// page start time
 	this.Data["PageStartTime"] = time.Now()
 	this.Data["AppName"] = setting.AppName
@@ -173,5 +175,34 @@ func (this *BaseController) CheckOnceToken() {
 		setting.Cache.Delete("Once_" + token)
 	} else {
 		this.Abort("Once")
+	}
+}
+
+func (this *BaseController) CheckRequestFrequency(minutes, warningLevel, banLevel int64) {
+	var key, denyKey string
+	key = "CRF-" + utils.EncodeMd5(this.Ctx.Input.Uri()+this.Ctx.Input.IP())
+	denyKey = "deny" + this.Ctx.Input.IP()
+	if !setting.Cache.IsExist(key) {
+		setting.Cache.Put(key, 1, minutes*60)
+	} else {
+		setting.Cache.Incr(key)
+	}
+	counterValue := cache.GetInt64(setting.Cache.Get(key))
+	//beego.Trace("CRF ", key, ": ", counterValue)
+	if counterValue >= banLevel {
+		setting.Cache.Put(denyKey, 1, 86400)
+		this.Abort("IPBan")
+		return
+	}
+	if counterValue >= warningLevel {
+		this.FlashWrite("warning", "你的提交频率不太正常，持续这样频率的反复提交可能导致你的ip被封锁！")
+	}
+}
+
+func (this *BaseController) checkDeny() {
+	denyKey := "deny" + this.Ctx.Input.IP()
+	if setting.Cache.IsExist(denyKey) {
+		this.Abort("IPBan")
+		return
 	}
 }

@@ -76,6 +76,7 @@ func (this *UserController) Edit() {
 		this.Abort("403")
 	}
 	if this.Ctx.Input.IsPost() {
+		this.CheckRequestFrequency(3, 15, 30)
 		action := this.GetString("action")
 		switch action {
 		case "UpdateUser":

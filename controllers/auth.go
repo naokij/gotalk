@@ -87,6 +87,7 @@ func (this *AuthController) loginPageWithErrors(form LoginForm, errors []*valida
 	this.Data["HasError"] = true
 }
 func (this *AuthController) DoLogin() {
+	this.CheckRequestFrequency(3, 15, 30)
 	if this.IsLogin {
 		this.Redirect("/", 302)
 	}
@@ -162,6 +163,7 @@ func (this *AuthController) registerPageWithErrors(form RegisterForm, errors []*
 }
 
 func (this *AuthController) DoRegister() {
+	this.CheckRequestFrequency(3, 15, 30)
 	this.Layout = "layout.html"
 	this.TplNames = "register.html"
 	valid := validation.Validation{}
@@ -281,7 +283,7 @@ func (this *AuthController) Activate() {
 func (this *AuthController) IsStopForumSpamListed(user *models.User) bool {
 	searchData := stopforumspam.SearchData{}
 	if beego.RunMode != "dev" {
-		searchData.Ip = this.Ctx.Request.RemoteAddr
+		searchData.Ip = this.Ctx.Input.IP()
 	}
 	searchData.Email = user.Email
 	resp, err := setting.StopForumSpam.Search(searchData)

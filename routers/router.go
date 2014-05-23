@@ -10,6 +10,7 @@ func init() {
 	beego.Errorhandler("403", controllers.Error403)
 	beego.Errorhandler("500", controllers.Error500)
 	beego.Errorhandler("Once", controllers.ErrorOnce)
+	beego.Errorhandler("IPBan", controllers.ErrorIPBan)
 
 	beego.Router("/", &controllers.MainController{})
 

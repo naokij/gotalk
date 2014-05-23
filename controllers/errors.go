@@ -51,3 +51,9 @@ func ErrorOnce(rw http.ResponseWriter, r *http.Request) {
 	data["Title"] = "重复提交 | " + setting.AppName
 	t.Execute(rw, data)
 }
+
+func ErrorIPBan(rw http.ResponseWriter, r *http.Request) {
+	t, _ := template.New("ipban.html").ParseFiles(beego.ViewsPath + "/errors/ipban.html")
+	data := make(map[string]interface{})
+	t.Execute(rw, data)
+}

@@ -159,6 +159,7 @@ func (this *SocialAuthController) Connect() {
 	}
 
 	if this.Ctx.Input.IsPost() {
+		this.CheckRequestFrequency(3, 15, 30)
 		action := this.GetString("action")
 		switch action {
 		case "Register":
