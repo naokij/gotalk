@@ -220,6 +220,7 @@ func (this *UserController) processUploadAvatar(user *models.User) {
 		this.Abort("400")
 	}
 	err = user.ValidateAndSetAvatar(avatarFile, header.Filename)
+	defer avatarFile.Close()
 	if err != nil {
 		valid.SetError("Avatar", err.Error())
 		this.Data["UserAvatarFormValidErrors"] = valid.Errors

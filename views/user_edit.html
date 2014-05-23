@@ -16,7 +16,7 @@
 					<input name="action" type="hidden" class="form-control" value="UploadAvatar">
 					<div class="form-group">
 						<input type="file" id="Avatar" name="Avatar" accept="image/*">
-						<p class="help-block">支持JPG、PNG图片</p>
+						<p class="help-block">支持JPG、PNG、GIF图片</p>
 					</div>
 					<button id="" name="" class="btn btn-block btn-primary">上传头像</button>
 				</form>
@@ -140,13 +140,13 @@ $(function() {
 		rules: {
 			Avatar: {
 				required :true,
-				extension: "jpeg|jpg|png",
+				extension: "jpeg|jpg|png|gif",
 			},
 		},
 		messages:{
 			Avatar:{
 				required: "请选择头像图片",
-				extension: "只允许jpg和png类型的图片",
+				extension: "只允许jpg,png和gif类型的图片",
 			},
 		},
 	});

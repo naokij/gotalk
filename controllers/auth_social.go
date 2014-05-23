@@ -27,7 +27,7 @@ import (
 	"github.com/naokij/gotalk/utils"
 	"github.com/naokij/social-auth"
 	"github.com/naokij/social-auth/apps"
-	//"net/http"
+	"net/http"
 )
 
 var (
@@ -143,6 +143,7 @@ func (this *SocialAuthController) Connect() {
 		user = models.User{Username: socialUserLogin}
 		if user.Read("Username") == nil {
 			registerForm.Username = socialUserLogin + utils.GetRandomString(3)
+			this.Data["UsernameTakenMsg"] = fmt.Sprintf("%s已经被使用，如果你不喜欢我们帮你选的%s，请修改", socialUserLogin, registerForm.Username)
 		} else {
 			registerForm.Username = socialUserLogin
 		}
@@ -174,7 +175,7 @@ func (this *SocialAuthController) processRegisterForm(socialType social.SocialTy
 	var user models.User
 	var actCode string
 	var sub *sendcloud.Substitution
-	//var resp *http.Response
+	var resp *http.Response
 	if err := this.ParseForm(&form); err != nil {
 		beego.Error(err)
 	}
@@ -222,13 +223,18 @@ func (this *SocialAuthController) processRegisterForm(socialType social.SocialTy
 		beego.Error(err)
 	}
 	//复制头像
-	// if resp, err = http.Get(socialUserAvatarUrl); err != nil {
-	// 	beego.Error(fmt.Sprintf("Error opening url:%s", socialUserAvatarUrl))
-	// 	this.Abort("500")
-	// 	return
-	// }
-	// defer resp.Body.Close()
-	// user.ValidateAndSetAvatar(resp.Body, filename)
+	if resp, err = http.Get(socialUserAvatarUrl); err != nil {
+		beego.Error(fmt.Sprintf("Error opening url:%s", socialUserAvatarUrl))
+		this.Abort("500")
+		return
+	}
+	defer resp.Body.Close()
+	if err := user.ValidateAndSetAvatar(resp.Body, ""); err != nil {
+		beego.Error("error copying avatar ", socialUserAvatarUrl, "error: ", err.Error())
+	}
+	if err := user.Update(); err != nil {
+		beego.Error("error update avatar for user ", user.Username)
+	}
 
 	this.FlashWrite("notice", fmt.Sprintf("注册成功！欢迎你, %s。建议你再花点时间验证电子邮件！", user.Username))
 	if loginRedirect, _, err := SocialAuth.ConnectAndLogin(this.Ctx, socialType, user.Id); err != nil {

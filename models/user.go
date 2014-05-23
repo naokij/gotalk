@@ -27,10 +27,13 @@ import (
 	"github.com/naokij/gotalk/setting"
 	"github.com/naokij/gotalk/utils"
 	"image"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"io"
+	"io/ioutil"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -202,22 +205,44 @@ func (m *User) ConsumeActivateCode(code string) error {
 func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error {
 	var img image.Image
 	var err error
-	ext := strings.ToLower(filepath.Ext(filename))
-	if ext != ".jpg" && ext != ".jpeg" && ext != "png" {
-		return errors.New("只允许jpg, png类型的图片")
+	var ext string
+	var tmpFile *os.File
+	if tmpFile, err = ioutil.TempFile(setting.TmpPath, "uploaded-avatar-"); err != nil {
+		return err
+	}
+	defer os.Remove(tmpFile.Name())
+	defer tmpFile.Close()
+	if _, err = io.Copy(tmpFile, avatarFile); err != nil {
+		return err
+	}
+	tmpFile.Seek(0, 0)
+	if filename != "" {
+		ext = strings.ToLower(filepath.Ext(filename))
+	} else {
+		ext = utils.GetImageFormat(tmpFile)
+		tmpFile.Seek(0, 0)
+	}
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" {
+		return errors.New("只允许jpg, png, gif类型的图片")
 	}
 	switch ext {
 	case ".jpg", ".jpeg":
-		img, err = jpeg.Decode(avatarFile)
+		img, err = jpeg.Decode(tmpFile)
 		if err != nil {
 			return errors.New("无法识别此jpg文件")
 		}
 	case ".png":
-		img, err = png.Decode(avatarFile)
+		img, err = png.Decode(tmpFile)
 		if err != nil {
 			return errors.New("无法识别此png文件")
 		}
+	case ".gif":
+		img, err = gif.Decode(tmpFile)
+		if err != nil {
+			return errors.New("无法识别此gif文件")
+		}
 	}
+
 	//crop正方形
 	bound := img.Bounds()
 	if w, h := bound.Dx(), bound.Dy(); w > h {
@@ -230,12 +255,14 @@ func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error
 	imgM := imaging.Resize(img, 48, 48, imaging.Lanczos)
 	imgS := imaging.Resize(img, 24, 24, imaging.Lanczos)
 	uuid := strings.Replace(uuid.New(), "-", "", -1)
-	ext = ".png"
 	imgLName, imgMName, imgSName := setting.TmpPath+uuid+"-l.png", setting.TmpPath+uuid+"-m.png", setting.TmpPath+uuid+"-s.png"
 	errL, errM, errS := imaging.Save(imgL, imgLName), imaging.Save(imgM, imgMName), imaging.Save(imgS, imgSName)
 	if errL != nil || errM != nil || errS != nil {
 		return errors.New("无法保存头像临时文件")
 	}
+	defer os.Remove(imgLName)
+	defer os.Remove(imgMName)
+	defer os.Remove(imgSName)
 
 	_, errL = setting.AvatarFSM.PutFile(imgLName, string(uuid[0])+"/"+string(uuid[1])+"/"+uuid+"-l.png")
 	_, errM = setting.AvatarFSM.PutFile(imgMName, string(uuid[0])+"/"+string(uuid[1])+"/"+uuid+"-m.png")
