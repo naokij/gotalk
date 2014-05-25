@@ -3,7 +3,17 @@
 		<div class="panel-body">
 			<img src="{{.TheUser.LargeAvatarUrl}}" class="avatar"></img>
 			<h3>{{.TheUser.Username}}</h3>
-			<a href="#" class="btn btn-success btn-follow" role="button"><span class="glyphicon glyphicon-plus"></span> 添加关注</a>
+			{{if .IsLogin}}
+			{{if ne .User.Id .TheUser.Id}}
+			<div class="box nobg">
+			    {{if .IsFollowed}}
+			        <button rel="user-unfollow" data-user="{{.TheUser.Id}}" class="btn btn-warning btn-md active"><span class="glyphicon glyphicon-minus"></span>取消关注</button>
+			    {{else}}
+			        <button rel="user-follow" data-user="{{.TheUser.Id}}" class="btn btn-success btn-md"><span class="glyphicon glyphicon-plus"></span> 添加关注</button>
+			    {{end}}
+			</div>
+			{{end}}
+			{{end}}
 			{{if .TheUser.Info}}
 			<p>{{.TheUser.Info|nl2br}}</p>
 			{{end}}
@@ -58,3 +68,15 @@
 		<div class="panel-body"></div>
 	</div>
 </div>
+<script>
+(function($){
+	$(document).on('click', '[rel=user-follow],[rel=user-unfollow]', function(){
+		var $btn = $(this);
+		$btn.button("loading");
+		$.post("/user-followunfollow", {action: $btn.attr('rel').replace('user-', ''), user: $btn.data('user'), _once: "{{oncetoken}}"}, function(data){
+		}).complete(function(){
+			window.location.reload();
+		});
+	});
+})(jQuery);
+</script>

@@ -36,4 +36,5 @@ func init() {
 	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")
 	beego.Router("/user/:username(.+)/resend-validation", userController, "get:ResendValidation")
 	beego.Router("/user/:username(.+)", userController, "get:Profile")
+	beego.Router("/user-followunfollow", userController, "post:FollowUnfollow")
 }

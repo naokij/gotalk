@@ -281,6 +281,67 @@ func (m *User) ValidateAndSetAvatar(avatarFile io.Reader, filename string) error
 	return nil
 }
 
+func (m *User) FollowingUsers() orm.QuerySeter {
+	return Follows().Filter("User", m.Id)
+}
+
+func (m *User) FollowerUsers() orm.QuerySeter {
+	return Follows().Filter("FollowUser", m.Id)
+}
+
+func (u *User) Follow(who *User) (err error) {
+	if err = who.Read(); err == nil {
+		var mutual bool
+
+		reverseFollow := Follow{User: who, FollowUser: u}
+		if err := reverseFollow.Read("User", "FollowUser"); err == nil {
+			mutual = true
+		}
+
+		follow := Follow{User: u, FollowUser: who, Mutual: mutual}
+		if err := follow.Insert(); err != nil && mutual {
+			reverseFollow.Mutual = mutual
+			reverseFollow.Update("Mutual")
+		}
+
+		if nums, err := u.FollowingUsers().Count(); err == nil {
+			u.Following = int(nums)
+			u.Update("Following")
+		}
+
+		if nums, err := who.FollowerUsers().Count(); err == nil {
+			who.Followers = int(nums)
+			who.Update("Followers")
+		}
+
+	} else {
+		err = fmt.Errorf("%s must be saved before he/she can be followed!")
+	}
+	return
+}
+
+func (u *User) UnFollow(who *User) (err error) {
+	num, _ := u.FollowingUsers().Filter("FollowUser", who.Id).Delete()
+	if num > 0 {
+		who.FollowingUsers().Filter("FollowUser", u.Id).Update(orm.Params{
+			"Mutual": false,
+		})
+
+		if nums, err := u.FollowingUsers().Count(); err == nil {
+			u.Following = int(nums)
+			u.Update("Following")
+		}
+
+		if nums, err := who.FollowerUsers().Count(); err == nil {
+			who.Followers = int(nums)
+			who.Update("Followers")
+		}
+	} else {
+		err = fmt.Errorf("%s not following %s", u.Username, who.Username)
+	}
+	return
+}
+
 func (u *User) TableEngine() string {
 	return "INNODB"
 }

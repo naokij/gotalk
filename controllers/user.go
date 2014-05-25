@@ -24,6 +24,7 @@ import (
 	"github.com/naokij/go-sendcloud"
 	"github.com/naokij/gotalk/models"
 	"github.com/naokij/gotalk/setting"
+	"strconv"
 	"time"
 )
 
@@ -56,6 +57,15 @@ func (this *UserController) Profile() {
 	this.Layout = "layout.html"
 	this.TplNames = "user_profile.html"
 	user, err := this.getUserFromRequest()
+	IsFollowed := false
+
+	if this.IsLogin {
+		if this.User.Id != user.Id {
+			IsFollowed = this.User.FollowingUsers().Filter("FollowUser", user.Id).Exist()
+		}
+	}
+	this.Data["IsFollowed"] = IsFollowed
+
 	if err != nil {
 		this.Abort("404")
 	}
@@ -264,4 +274,31 @@ func (this *UserController) ResendValidation() {
 	this.FlashWrite("notice", fmt.Sprintf("验证邮件已经发送，请登录%s进行验证。", user.Email))
 	redirectUrl := beego.UrlFor("UserController.Edit", ":username", user.Username)
 	this.Redirect(redirectUrl, 302)
+}
+
+func (this *UserController) FollowUnfollow() {
+	result := map[string]interface{}{
+		"success": false,
+	}
+	action := this.GetString("action")
+
+	if this.IsLogin {
+
+		switch action {
+		case "follow", "unfollow":
+			id, err := strconv.ParseInt(this.GetString("user"), 10, 0)
+			if err == nil && int(id) != this.User.Id {
+				fuser := models.User{Id: int(id)}
+				if action == "follow" {
+					this.User.Follow(&fuser)
+				} else {
+					this.User.UnFollow(&fuser)
+				}
+				result["success"] = true
+			}
+		}
+	}
+
+	this.Data["json"] = result
+	this.ServeJson()
 }
