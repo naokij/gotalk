@@ -80,7 +80,7 @@
 
 					<div class="form-group">
 						<label class="control-label" for="Weibo">微博</label>  
-						<input id="Weibo" name="Weibo" placeholder="微博用户名" class="form-control input-md" type="text" value="{{.UserEditForm.Weibo}}">
+						<input id="Weibo" name="Weibo" placeholder="微博网址" class="form-control input-md" type="text" value="{{.UserEditForm.Weibo}}">
 					</div>
 
 					<div class="form-group">
@@ -160,6 +160,12 @@ $(function() {
 			Url:{
 				url: true,
 			},
+			Weibo:{
+				url: true,
+			},
+			Qq:{
+				number: true,
+			}
 		},
 		messages: {
 			Email: {
@@ -168,6 +174,12 @@ $(function() {
 			},
 			Url:{
 				url: "网址格式错误",
+			},
+			Weibo:{
+				url: "网址格式错误",
+			},
+			Qq:{
+				number: "QQ号错误",
 			},
 		},
 	});

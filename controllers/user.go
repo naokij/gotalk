@@ -57,6 +57,7 @@ func (this *UserController) Profile() {
 	this.Layout = "layout.html"
 	this.TplNames = "user_profile.html"
 	user, err := this.getUserFromRequest()
+	this.Data["PageTitle"] = fmt.Sprintf("%s | %s", user.Username, setting.AppName)
 	IsFollowed := false
 
 	if this.IsLogin {

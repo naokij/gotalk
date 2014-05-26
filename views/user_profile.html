@@ -18,10 +18,9 @@
 			<p>{{.TheUser.Info|nl2br}}</p>
 			{{end}}
 			<div class="sns">
-				<a href="#"><span class="glyphicon glyphicon-home"></span></a>
-				<a href="#"><i class="icon-qq"></i></a>
-				<a href="#"><i class="icon-wechat"></i></a>
-				<a href="#"><i class="icon-weibo"></i></a>
+				{{if .TheUser.Url}}<a href="{{.TheUser.Url}}"><span class="glyphicon glyphicon-home"></span></a>{{end}}
+				{{if .TheUser.Qq}}<a href="#" title="{{.TheUser.Qq}}"><i class="icon-qq"></i></a>{{end}}
+				{{if .TheUser.Weibo}}<a href="{{.TheUser.Weibo}}"><i class="icon-weibo"></i></a>{{end}}
 			</div>
 		</div>
 	</div>
@@ -30,8 +29,8 @@
 			<table class="profile-stats table">
 				<tbody>
 					<tr>
-						<td><strong>23</strong></strong></td>
-						<td><strong>30</strong></td>
+						<td><strong>{{.TheUser.Followers}}</strong></strong></td>
+						<td><strong>{{.TheUser.Following}}</strong></td>
 						<td><strong>1500</strong></td>
 						<td><strong>15000</strong></td>
 					</tr>
@@ -72,10 +71,10 @@
 (function($){
 	$(document).on('click', '[rel=user-follow],[rel=user-unfollow]', function(){
 		var $btn = $(this);
-		$btn.button("loading");
+		$btn.button("努力加载中");
 		$.post("/user-followunfollow", {action: $btn.attr('rel').replace('user-', ''), user: $btn.data('user'), _once: "{{oncetoken}}"}, function(data){
 		}).complete(function(){
-			window.location.reload();
+			window.location.reload(true);
 		});
 	});
 })(jQuery);
