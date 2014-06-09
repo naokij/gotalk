@@ -2,12 +2,17 @@ package models
 
 import (
 	//"fmt"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/naokij/gotalk/setting"
 	"testing"
 )
 
 func init() {
-	orm.RegisterDataBase("default", "mysql", "root@/gotalk?charset=utf8", 30)
+	//orm.RegisterDataBase("default", "mysql", "root@/gotalk?charset=utf8", 30)
+	beego.AppConfigPath = "../conf/app.conf"
+	beego.ParseConfig()
+	setting.ReadConfig()
 	orm.RunSyncdb("default", true, false)
 }
 
