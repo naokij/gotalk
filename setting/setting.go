@@ -119,7 +119,7 @@ func ReadConfig() {
 		beego.Error("mysql", err)
 		ConfigBroken = true
 	}
-	if err := orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai"); err != nil {
+	if err := orm.RegisterDataBase("default", "mysql", fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?charset=utf8", MySQLUser, MySQLPassword, MySQLHost, MySQLDB)+"&loc=Asia%2FShanghai", 30); err != nil {
 		beego.Error("mysql", err)
 		ConfigBroken = true
 	}

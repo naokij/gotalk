@@ -11,6 +11,11 @@ user = root
 password = 
 db = gotalk
 
+[importer]
+discuzdb = discuz
+avatarpath = /Users/jiangle/project/import/avatar
+
+
 [mongodb]
 host = 127.0.0.1
 name = gotalk
