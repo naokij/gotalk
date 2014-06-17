@@ -6,6 +6,7 @@
 *  github.com/naokij/go-sendcloud
 *  github.com/naokij/GoStopForumSpam
 *  github.com/naokij/social-auth
+*  github.com/naokij/bbcode
 
 
 ###uuid

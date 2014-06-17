@@ -14,11 +14,10 @@ var DiscuzDb string
 var Orm orm.Ormer
 var OrmGotalk orm.Ormer
 var Workers = runtime.NumCPU()
-var WorkerLoad = 2500
+var WorkerLoad int = 20000
 var AvatarPath string
 
 func init() {
-	Workers = 8
 	runtime.GOMAXPROCS(Workers)
 	beego.AppConfigPath = "../conf/app.conf"
 	beego.ParseConfig()

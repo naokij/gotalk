@@ -13,7 +13,7 @@ type discuzUser struct {
 	Username string
 	Password string
 	Email    string
-	Regdate  time.Time
+	Regdate  int64
 	Salt     string
 	Qq       string
 	Site     string
@@ -95,7 +95,7 @@ func UsersJob(discuzRes []discuzUser, done chan bool) {
 		gotalkRes.Password = discuzRow.Password
 		gotalkRes.Email = discuzRow.Email
 		gotalkRes.Salt = discuzRow.Salt
-		gotalkRes.Created = discuzRow.Regdate
+		gotalkRes.Created = time.Unix(discuzRow.Regdate, 0)
 		gotalkRes.Url = cutString(discuzRow.Site, 100)
 		gotalkRes.Info = cutString(discuzRow.Bio, 255)
 		gotalkRes.Qq = discuzRow.Qq
