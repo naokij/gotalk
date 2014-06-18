@@ -175,8 +175,10 @@ func (m *Comment) TableEngine() string {
 }
 
 type Content struct {
-	Id      bson.ObjectId `bson:"_id,omitempty"`
-	Message string
+	Id        bson.ObjectId `bson:"_id,omitempty"`
+	TopicId   int
+	CommentId int
+	Message   string
 }
 
 func (m *Content) Session() *mgo.Session {

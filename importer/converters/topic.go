@@ -109,7 +109,7 @@ func TopicsWorker(pos int64, limit int, done chan bool) {
 		"ip"}
 
 	for _, discuzTopic := range discuzTopics {
-		content := &models.Content{Message: bbcodeCompiler.Compile(discuzTopic.Message)}
+		content := &models.Content{Message: bbcodeCompiler.Compile(discuzTopic.Message), TopicId: discuzTopic.Tid}
 		var contentHex string
 		var err error
 		if contentHex, err = content.Insert(); err != nil {
