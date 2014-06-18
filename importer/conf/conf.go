@@ -14,7 +14,7 @@ var DiscuzDb string
 var Orm orm.Ormer
 var OrmGotalk orm.Ormer
 var Workers = runtime.NumCPU()
-var WorkerLoad int = 20000
+var WorkerLoad int = 30000
 var AvatarPath string
 
 func init() {
