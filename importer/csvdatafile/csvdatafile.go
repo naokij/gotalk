@@ -13,6 +13,7 @@ type CSVDataFile struct {
 	File               string
 	fh                 *os.File
 	writer             *csv.Writer
+	hasImportError     bool
 	FieldsTerminatedBy rune
 	EnclosedBy         string
 	LinesTerminatedBy  string
@@ -49,10 +50,17 @@ func (c *CSVDataFile) AppendRow(record ...interface{}) error {
 	c.writer.Comma = c.FieldsTerminatedBy
 	recordToWrite := make([]string, len(record))
 	for k, v := range record {
-		recordToWrite[k] = orm.ToStr(v)
+		recordToWrite[k] = c.quoteField(orm.ToStr(v))
 	}
 	err = c.writer.Write(recordToWrite)
 	return err
+}
+
+func (c *CSVDataFile) quoteField(field string) string {
+	if strings.IndexAny(field, `\`) > 0 {
+		return strings.Replace(field, `\`, `\\`, -1)
+	}
+	return field
 }
 
 func (c *CSVDataFile) Flush() error {
@@ -65,12 +73,19 @@ func (c *CSVDataFile) Close() error {
 }
 
 func (c *CSVDataFile) Remove() error {
-	return os.Remove(c.File)
+	if !c.hasImportError {
+		return os.Remove(c.File)
+	} else {
+		return fmt.Errorf("csvdatafile import error. keep csv file for debug.")
+	}
 }
 
 func (c *CSVDataFile) LoadToMySQL(o orm.Ormer) error {
 	sql := fmt.Sprintf(`load data infile '%s' into table %s FIELDS TERMINATED BY '%s' ENCLOSED BY '"' (%s)`, c.File, c.Table, string(c.FieldsTerminatedBy), strings.Join(c.Fields, ", "))
 	//fmt.Println(sql)
 	_, err := o.Raw(sql).Exec()
+	if err != nil {
+		c.hasImportError = true
+	}
 	return err
 }

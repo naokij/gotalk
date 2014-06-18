@@ -28,21 +28,38 @@ type DiscuzTopic struct {
 }
 
 func Topics() {
+	var working int
 	var pos int64
-	done := make(chan bool, conf.Workers)
+	done := make(chan bool)
 	rows, err := NumOfRows(conf.Orm, "pre_forum_thread")
 	if err != nil {
 		fmt.Println("Topics Error:", err)
 	}
 	fmt.Println("Converting Topics")
-	conf.OrmGotalk.Raw("ALTER TABLE `topic` DISABLE KEYS;").Exec()
-	defer conf.OrmGotalk.Raw("ALTER TABLE `topic` ENABLE KEYS;").Exec()
-topicLoop:
+
+	for i := 0; i < conf.Workers; i++ {
+		if rows == 0 {
+			break
+		}
+		var load int
+		if int64(conf.WorkerLoad) > rows {
+			load = int(rows)
+		} else {
+			load = conf.WorkerLoad
+		}
+		go TopicsWorker(pos, conf.WorkerLoad, done)
+		pos += int64(load)
+		rows -= int64(load)
+		working++
+	}
 	for {
-		for i := 0; i < conf.Workers; i++ {
-			if rows == 0 {
-				break topicLoop
+		<-done
+		working--
+		if rows == 0 {
+			if working == 0 {
+				break
 			}
+		} else {
 			var load int
 			if int64(conf.WorkerLoad) > rows {
 				load = int(rows)
@@ -50,25 +67,18 @@ topicLoop:
 				load = conf.WorkerLoad
 			}
 			go TopicsWorker(pos, conf.WorkerLoad, done)
+			working++
 			pos += int64(load)
 			rows -= int64(load)
 		}
-		for i := 0; i < conf.Workers; i++ {
-			<-done
-		}
 	}
-	fmt.Println("")
 }
 
 func TopicsWorker(pos int64, limit int, done chan bool) {
 	defer func() {
-		fmt.Print(".")
+		fmt.Println("Topic", pos, "to", pos+int64(limit), "done")
 		done <- true
 	}()
-	RunPreImportMySQLSettings(conf.OrmGotalk)
-	conf.OrmGotalk.Raw("SET autocommit=0;").Exec()
-	defer conf.OrmGotalk.Raw("COMMIT;").Exec()
-	fmt.Println("Pos", pos)
 	bbcodeCompiler := bbcode.NewCompiler(true, true)
 	var discuzTopics []DiscuzTopic
 	csvfile := csvdatafile.New("topic", fmt.Sprintf("/tmp/topic-%d.csv", pos))
