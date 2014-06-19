@@ -31,7 +31,20 @@ func Topics() {
 	var working int
 	var pos int64
 	done := make(chan bool)
-	rows, err := NumOfRows(conf.Orm, "pre_forum_thread")
+	fmt.Println("Fixing discuz post table")
+	var tmpData []struct {
+		Pid int
+	}
+	//修复pre_forum_post缺少first=1的行
+	if _, err := conf.Orm.Raw("SELECT pid FROM `pre_forum_post`  GROUP BY tid HAVING max( FIRST ) =0 ORDER BY dateline ASC;").QueryRows(&tmpData); err != nil {
+		fmt.Println("Topic fix discuz post table:", err)
+	}
+	for _, pid := range tmpData {
+		if _, err := conf.Orm.Raw("UPDATE pre_forum_post set first=1 where pid = ?", pid.Pid).Exec(); err != nil {
+			fmt.Println("Topic fix discuz post table:", err)
+		}
+	}
+	rows, err := NumOfRows(conf.Orm, "select count(t.tid) as rows from pre_forum_thread as t left join pre_forum_post as p on t.tid=p.tid where p.first = 1")
 	if err != nil {
 		fmt.Println("Topics Error:", err)
 	}

@@ -10,12 +10,11 @@ type TableRows struct {
 	Rows int64
 }
 
-func NumOfRows(o orm.Ormer, table string) (int64, error) {
+func NumOfRows(o orm.Ormer, sql string) (int64, error) {
 	type tableRows struct {
 		Rows int64
 	}
 	var rows tableRows
-	sql := fmt.Sprintf("select count(*) as rows from `%s`", table)
 	if err := o.Raw(sql).QueryRow(&rows); err != nil {
 		return 0, err
 	}

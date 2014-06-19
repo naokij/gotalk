@@ -112,6 +112,8 @@ type Comment struct {
 	ContentHex string    `orm:"size(24)"`
 	Content    *Content  `orm:"-"`
 	User       *User     `orm:"rel(fk)"`
+	Username   string    `orm:"size(30)`
+	Ip         string    `orm:"size(39)"`
 	Created    time.Time `orm:"auto_now_add"`
 	Updated    time.Time `orm:"auto_now"`
 }
