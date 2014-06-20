@@ -21,11 +21,13 @@ import (
 )
 
 type Follow struct {
-	Id         int
-	User       *User `orm:"rel(fk)"`
-	FollowUser *User `orm:"rel(fk)"`
-	Mutual     bool
-	Created    time.Time `orm:"auto_now_add"`
+	Id             int
+	User           *User  `orm:"rel(fk)"`
+	Username       string `orm:"size(30)`
+	FollowUser     *User  `orm:"rel(fk)"`
+	FollowUsername string `orm:"size(30)`
+	Mutual         bool
+	Created        time.Time `orm:"auto_now_add;index"`
 }
 
 func (*Follow) TableUnique() [][]string {
@@ -35,6 +37,12 @@ func (*Follow) TableUnique() [][]string {
 }
 
 func (m *Follow) Insert() error {
+	if m.User != nil {
+		m.Username = m.User.Username
+	}
+	if m.FollowUser != nil {
+		m.FollowUsername = m.FollowUser.Username
+	}
 	if _, err := orm.NewOrm().Insert(m); err != nil {
 		return err
 	}

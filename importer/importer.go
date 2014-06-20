@@ -9,6 +9,8 @@ import (
 func main() {
 	startTime := time.Now()
 	converters.Users()
+	converters.Follows()
+	converters.Categories()
 	converters.Topics()
 	converters.Comments()
 	timeUsed := time.Since(startTime)

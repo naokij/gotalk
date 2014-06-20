@@ -299,7 +299,7 @@ func (u *User) Follow(who *User) (err error) {
 		}
 
 		follow := Follow{User: u, FollowUser: who, Mutual: mutual}
-		if err := follow.Insert(); err != nil && mutual {
+		if err := follow.Insert(); err == nil && mutual {
 			reverseFollow.Mutual = mutual
 			reverseFollow.Update("Mutual")
 		}

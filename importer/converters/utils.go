@@ -58,26 +58,6 @@ func Map2InsertSql(o orm.Ormer, table string, data map[string]interface{}) error
 		valuesPlaceHolders = append(valuesPlaceHolders, "? ")
 		keys = append(keys, fmt.Sprintf("`%s`", k))
 		values = append(values, v) //
-		// switch v.(type) {
-		// case bool:
-		// 	values = append(values, fmt.Sprintf("%d", Btoi(v.(bool))))
-		// case int:
-		// 	values = append(values, fmt.Sprint(v.(int)))
-		// case int32:
-		// 	values = append(values, fmt.Sprint(v.(int32)))
-		// case int64:
-		// 	values = append(values, fmt.Sprint(v.(int64)))
-		// case float64:
-		// 	values = append(values, fmt.Sprint(v.(float64)))
-		// case string:
-		// 	values = append(values, v.(string))
-		// case time.Time:
-		// 	t := v.(time.Time)
-		// 	formattedTime := t.Format("2006-01-02 15:04:05")
-		// 	values = append(values, formattedTime)
-		// case nil:
-		// 	values = append(values, "NULL")
-		// }
 	}
 	sql := fmt.Sprintf("INSERT INTO `%s` (%s) VALUES(%s)", table, strings.Join(keys, ","), strings.Join(valuesPlaceHolders, ","))
 	_, err := o.Raw(sql, values...).Exec()
