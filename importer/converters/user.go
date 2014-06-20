@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type discuzUser struct {
+type DiscuzUser struct {
 	Uid      int
 	Username string
 	Password string
@@ -19,156 +19,131 @@ type discuzUser struct {
 	Site     string
 	Bio      string
 	Authstr  string
-}
-
-func cutString(str string, length int) string {
-	chars := []rune(str)
-	if len(chars) <= length {
-		return str
-	}
-	return string(chars[0:length])
+	Groupid  int
 }
 
 func Users() {
-
+	var working int
 	var pos int64
-	batchLoad := int64(conf.WorkerLoad * conf.Workers)
-	discuzRes := make([]discuzUser, batchLoad)
-	var end bool
-	done := make(chan bool, conf.Workers)
+	done := make(chan bool)
+	rows, err := NumOfRows(conf.Orm, "SELECT count(u.uid) as rows from uc_members as u left join pre_common_member_profile as p on u.uid=p.uid left join pre_common_member_field_forum as f on u.uid=f.uid")
+	if err != nil {
+		fmt.Println("Users Error:", err)
+	}
 	fmt.Println("Converting Users")
-	os.RemoveAll("../avatars/")
+
 	conf.OrmGotalk.Raw("ALTER TABLE `user` CHANGE `username` `username` VARCHAR( 30 ) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL").Exec()
 	conf.OrmGotalk.Raw("ALTER TABLE `user` DROP INDEX `username`").Exec()
 	conf.OrmGotalk.Raw("ALTER TABLE `user` DROP INDEX `email`").Exec()
-	for !end {
-		sql := "SELECT u.uid, u.username, u.password, u.email, u.regdate, u.salt,p.qq, p.site,p.bio, f.authstr from uc_members as u left join pre_common_member_profile as p on u.uid=p.uid left join pre_common_member_field_forum as f on u.uid=f.uid limit ?,?"
-		num, err := conf.Orm.Raw(sql, pos, batchLoad).QueryRows(&discuzRes)
-		if err != nil {
-			fmt.Println("MySQL error:", err.Error())
-			return
+
+	defer func() {
+		if _, err := conf.OrmGotalk.Raw("ALTER TABLE `user` ADD UNIQUE (`username`);").Exec(); err != nil {
+			fmt.Println(err)
 		}
-		if num == 0 {
-			end = true
-			continue
+		if _, err := conf.OrmGotalk.Raw("ALTER TABLE `user` ADD INDEX ( `email` ) ;").Exec(); err != nil {
+			fmt.Println(err)
 		}
-		rows := len(discuzRes)
-		for i := 0; i < conf.Workers; i++ {
-			if rows == 0 {
+	}()
+
+	for i := 0; i < conf.Workers; i++ {
+		if rows == 0 {
+			break
+		}
+		var load int
+		if int64(conf.WorkerLoad) > rows {
+			load = int(rows)
+		} else {
+			load = conf.WorkerLoad
+		}
+		go UsersWorker(pos, conf.WorkerLoad, done)
+		pos += int64(load)
+		rows -= int64(load)
+		working++
+	}
+	for {
+		<-done
+		working--
+		if rows == 0 {
+			if working == 0 {
 				break
 			}
-			startPos := i * conf.WorkerLoad
+		} else {
 			var load int
-			if conf.WorkerLoad > rows {
-				load = rows
+			if int64(conf.WorkerLoad) > rows {
+				load = int(rows)
 			} else {
 				load = conf.WorkerLoad
 			}
-			endPos := startPos + load
-			jobData := discuzRes[startPos:endPos]
-			go UsersJob(jobData, done)
-			rows -= load
+			go UsersWorker(pos, conf.WorkerLoad, done)
+			working++
+			pos += int64(load)
+			rows -= int64(load)
 		}
-		for i := 0; i < conf.Workers; i++ {
-			<-done
-		}
-		fmt.Print(".")
-		pos += batchLoad
 	}
-	if _, err := conf.OrmGotalk.Raw("ALTER TABLE `user` ADD UNIQUE (`username`);").Exec(); err != nil {
-		fmt.Println(err)
-	}
-	if _, err := conf.OrmGotalk.Raw("ALTER TABLE `user` ADD INDEX ( `email` ) ;").Exec(); err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("")
 }
 
-func UsersJob(discuzRes []discuzUser, done chan bool) {
+func UsersWorker(pos int64, limit int, done chan bool) {
 	defer func() {
+		fmt.Println("User", pos, "to", pos+int64(limit), "done")
 		done <- true
 	}()
-	for _, discuzRow := range discuzRes {
-		gotalkRes := new(models.User)
-		gotalkRes.Id = discuzRow.Uid
-		gotalkRes.Username = discuzRow.Username
-		gotalkRes.Password = discuzRow.Password
-		gotalkRes.Email = discuzRow.Email
-		gotalkRes.Salt = discuzRow.Salt
-		gotalkRes.Created = time.Unix(discuzRow.Regdate, 0)
-		gotalkRes.Url = cutString(discuzRow.Site, 100)
-		gotalkRes.Info = cutString(discuzRow.Bio, 255)
-		gotalkRes.Qq = discuzRow.Qq
-		if discuzRow.Authstr == "" {
-			gotalkRes.IsActive = true
-		} else {
-			gotalkRes.IsActive = false
-		}
-		p, err := conf.OrmGotalk.Raw(` INSERT INTO user (
-			id ,
-			username ,
-			nickname ,
-			password ,
-			url ,
-			company ,
-			location ,
-			email ,
-			avatar ,
-			info ,
-			weibo ,
-			we_chat ,
-			qq ,
-			public_email ,
-			followers ,
-			following ,
-			fav_topics ,
-			is_admin ,
-			is_active ,
-			is_banned ,
-			salt ,
-			created ,
-			updated 
-			)
-			VALUES (
-			? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`).Prepare()
-		if err != nil {
-			fmt.Println(err)
-		}
-		_, err = p.Exec(gotalkRes.Id,
-			gotalkRes.Username,
-			"",
-			gotalkRes.Password,
-			gotalkRes.Url,
-			"",
-			"",
-			gotalkRes.Email,
-			"",
-			gotalkRes.Info,
-			"",
-			"",
-			gotalkRes.Qq,
-			0,
-			0,
-			0,
-			0,
-			0,
-			gotalkRes.IsActive,
-			0,
-			gotalkRes.Salt,
-			gotalkRes.Created,
-		)
-		if err != nil {
-			fmt.Println(err)
-		}
-		idstr := fmt.Sprintf("%09d", gotalkRes.Id)
+	var discuzUsers []DiscuzUser
+	sql := "SELECT u.uid, u.username, u.password, u.email, u.regdate, u.salt,p.qq, p.site,p.bio, f.authstr, cm.groupid from uc_members as u left join pre_common_member_profile as p on u.uid=p.uid left join pre_common_member_field_forum as f on u.uid=f.uid left join pre_common_member as cm on u.uid=cm.uid limit ?,?"
+	if _, err := conf.Orm.Raw(sql, pos, limit).QueryRows(&discuzUsers); err != nil {
+		fmt.Println("Users Worker Error:", err)
+		return
+	}
 
+	for _, discuzUser := range discuzUsers {
+		var isActive int
+		var isBanned int
+		if discuzUser.Authstr == "" {
+			isActive = 1
+		} else {
+			isActive = 0
+		}
+		if discuzUser.Groupid == 4 || discuzUser.Groupid == 5 || discuzUser.Groupid == 6 || discuzUser.Groupid == 17 {
+			isBanned = 1
+		} else {
+			isBanned = 0
+		}
+		insertData := map[string]interface{}{
+			"id":           discuzUser.Uid,
+			"username":     discuzUser.Username,
+			"nickname":     "",
+			"password":     discuzUser.Password,
+			"url":          cutString(discuzUser.Site, 100),
+			"company":      "",
+			"location":     "",
+			"email":        discuzUser.Email,
+			"avatar":       "",
+			"info":         cutString(discuzUser.Bio, 255),
+			"weibo":        "",
+			"we_chat":      "",
+			"qq":           discuzUser.Qq,
+			"public_email": 0,
+			"followers":    0,
+			"following":    0,
+			"fav_topics":   0,
+			"is_admin":     0,
+			"is_active":    isActive,
+			"is_banned":    isBanned,
+			"salt":         discuzUser.Salt,
+			"created":      time.Unix(discuzUser.Regdate, 0),
+			"updated":      "0000-00-00 00:00:00"}
+		if err := Map2InsertSql(conf.OrmGotalk, "user", insertData); err != nil {
+			fmt.Println(err)
+		}
+	}
+	//处理头像
+	for _, discuzUser := range discuzUsers {
+		user := &models.User{Id: discuzUser.Uid}
+		idstr := fmt.Sprintf("%09d", discuzUser.Uid)
 		avatarFileName := fmt.Sprintf("%s/%s/%s/%s/%s_avatar_big.jpg", conf.AvatarPath, idstr[:3], idstr[3:5], idstr[5:7], idstr[7:9])
 		if avatarFile, err := os.Open(avatarFileName); err == nil {
 			defer avatarFile.Close()
-			gotalkRes.ValidateAndSetAvatar(avatarFile, "avatar_big.jpg")
-			gotalkRes.Update("Avatar")
+			user.ValidateAndSetAvatar(avatarFile, "avatar_big.jpg")
+			user.Update("Avatar")
 		}
-		p.Close()
 	}
-
 }

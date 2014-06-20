@@ -8,7 +8,7 @@ import (
 
 func main() {
 	startTime := time.Now()
-	//converters.Users()
+	converters.Users()
 	converters.Topics()
 	converters.Comments()
 	timeUsed := time.Since(startTime)

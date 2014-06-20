@@ -58,7 +58,8 @@ func (c *CSVDataFile) AppendRow(record ...interface{}) error {
 
 func (c *CSVDataFile) quoteField(field string) string {
 	if strings.IndexAny(field, `\`) > 0 {
-		return strings.Replace(field, `\`, `\\`, -1)
+		str := strings.Replace(field, `\`, `\\`, -1)
+		return str
 	}
 	return field
 }
@@ -86,6 +87,7 @@ func (c *CSVDataFile) LoadToMySQL(o orm.Ormer) error {
 	_, err := o.Raw(sql).Exec()
 	if err != nil {
 		c.hasImportError = true
+		return fmt.Errorf("datafile %s: %s", c.File, err.Error())
 	}
-	return err
+	return nil
 }
