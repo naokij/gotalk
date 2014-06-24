@@ -7,7 +7,7 @@
 *  github.com/naokij/GoStopForumSpam
 *  github.com/naokij/social-auth
 *  github.com/naokij/bbcode
-
+*  github.com/astaxie/beego
 
 ###uuid
  CGO_ENABLED=1 ./make.bash 

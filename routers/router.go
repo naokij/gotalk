@@ -27,8 +27,8 @@ func init() {
 	beego.Router("/register/validate-captcha", authController, "get:ValidateCaptcha")
 	beego.Router("/activate/:code([0-9a-zA-Z]+)", authController, "get:Activate")
 	//社交帐号登录
-	beego.AddFilter("/login/:/access", "BeforeRouter", controllers.OAuthAccess)
-	beego.AddFilter("/login/:", "BeforeRouter", controllers.OAuthRedirect)
+	beego.InsertFilter("/login/*:/access", beego.BeforeRouter, controllers.OAuthAccess)
+	beego.InsertFilter("/login/*:", beego.BeforeRouter, controllers.OAuthRedirect)
 	socialAuthController := new(controllers.SocialAuthController)
 	beego.Router("/register/connect", socialAuthController, "get:Connect;post:Connect")
 
