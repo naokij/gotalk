@@ -132,3 +132,21 @@ label.suggest{
 .social-login-icons img{
   width: 40px;
 }
+/*用户列表*/
+.users .users-container {
+    padding: 0;
+}
+
+.users .users-box {
+    display: inline-block;
+    margin-top: 20px;
+    text-align: center;
+    vertical-align: top;
+    width: 104px;
+}
+.users .users-box .avatar{
+    background-color: #fff;
+    border: 1px solid #ddd;
+    max-width: 100%;
+    padding: 4px;
+}

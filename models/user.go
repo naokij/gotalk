@@ -41,29 +41,34 @@ import (
 )
 
 type User struct {
-	Id          int
-	Username    string    `orm:"size(30);unique"`
-	Nickname    string    `orm:"size(30)"`
-	Password    string    `orm:"size(128)"`
-	Url         string    `orm:"size(100)"`
-	Company     string    `orm:"size(30)"`
-	Location    string    `orm:"size(30)"`
-	Email       string    `orm:"size(80);unique"`
-	Avatar      string    `orm:"size(32)"`
-	Info        string    ``
-	Weibo       string    `orm:"size(30)"`
-	WeChat      string    `orm:"size(20)"`
-	Qq          string    `orm:"size(20)"`
-	PublicEmail bool      ``
-	Followers   int       ``
-	Following   int       ``
-	FavTopics   int       ``
-	IsAdmin     bool      `orm:"index"`
-	IsActive    bool      `orm:"index"`
-	IsBanned    bool      `orm:"index"`
-	Salt        string    `orm:"size(6)"`
-	Created     time.Time `orm:"auto_now_add"`
-	Updated     time.Time `orm:"auto_now"`
+	Id              int
+	Username        string `orm:"size(30);unique"`
+	Nickname        string `orm:"size(30)"`
+	Password        string `orm:"size(128)"`
+	Url             string `orm:"size(100)"`
+	Company         string `orm:"size(30)"`
+	Location        string `orm:"size(30)"`
+	Email           string `orm:"size(80);unique"`
+	Avatar          string `orm:"size(32)"`
+	Info            string ``
+	Weibo           string `orm:"size(30)"`
+	WeChat          string `orm:"size(20)"`
+	Qq              string `orm:"size(20)"`
+	PublicEmail     bool   ``
+	Followers       int    ``
+	Following       int    ``
+	FavTopics       int    ``
+	Topics          int
+	Comments        int
+	Reputation      int
+	Credits         int
+	ExcellentTopics int
+	IsAdmin         bool      `orm:"index"`
+	IsActive        bool      `orm:"index"`
+	IsBanned        bool      `orm:"index"`
+	Salt            string    `orm:"size(6)"`
+	Created         time.Time `orm:"auto_now_add;index"`
+	Updated         time.Time `orm:"auto_now"`
 }
 
 const (
@@ -289,6 +294,23 @@ func (m *User) FollowerUsers() orm.QuerySeter {
 	return Follows().Filter("FollowUser", m.Id)
 }
 
+func (m *User) LatestTopics(count int) []*Topic {
+	var topics []*Topic
+	qs := orm.NewOrm().QueryTable("topic")
+	qs.Filter("user_id", m.Id).OrderBy("-created").Limit(count).All(&topics)
+	return topics
+}
+
+func (m *User) LatestComments(count int) []*Comment {
+	var comments []*Comment
+	qs := orm.NewOrm().QueryTable("comment")
+	qs.Filter("user_id", m.Id).OrderBy("-created").Limit(count).All(&comments)
+	for k, _ := range comments {
+		comments[k].SyncContent()
+	}
+	return comments
+}
+
 func (u *User) Follow(who *User) (err error) {
 	if err = who.Read(); err == nil {
 		var mutual bool
@@ -344,6 +366,10 @@ func (u *User) UnFollow(who *User) (err error) {
 
 func (u *User) TableEngine() string {
 	return "INNODB"
+}
+
+func Users() orm.QuerySeter {
+	return orm.NewOrm().QueryTable("user")
 }
 
 func init() {

@@ -9,17 +9,22 @@ import (
 )
 
 type DiscuzUser struct {
-	Uid      int
-	Username string
-	Password string
-	Email    string
-	Regdate  int64
-	Salt     string
-	Qq       string
-	Site     string
-	Bio      string
-	Authstr  string
-	Groupid  int
+	Uid         int
+	Username    string
+	Password    string
+	Email       string
+	Regdate     int64
+	Salt        string
+	Qq          string
+	Site        string
+	Bio         string
+	Authstr     string
+	Groupid     int
+	Extcredits1 int
+	Extcredits8 int
+	Posts       int
+	Threads     int
+	Digestposts int
 }
 
 func Users() {
@@ -88,7 +93,7 @@ func UsersWorker(pos int64, limit int, done chan bool) {
 		done <- true
 	}()
 	var discuzUsers []DiscuzUser
-	sql := "SELECT u.uid, u.username, u.password, u.email, u.regdate, u.salt,p.qq, p.site,p.bio, f.authstr, cm.groupid from uc_members as u left join pre_common_member_profile as p on u.uid=p.uid left join pre_common_member_field_forum as f on u.uid=f.uid left join pre_common_member as cm on u.uid=cm.uid limit ?,?"
+	sql := "SELECT u.uid, u.username, u.password, u.email, u.regdate, u.salt,p.qq, p.site,p.bio, f.authstr, cm.groupid, mc.extcredits1, mc.extcredits8, mc.posts, mc.threads, mc.digestposts from uc_members as u left join pre_common_member_profile as p on u.uid=p.uid left join pre_common_member_field_forum as f on u.uid=f.uid left join pre_common_member as cm on u.uid=cm.uid left join pre_common_member_count as mc on u.uid=mc.uid limit ?,?"
 	if _, err := conf.Orm.Raw(sql, pos, limit).QueryRows(&discuzUsers); err != nil {
 		fmt.Println("Users Worker Error:", err)
 		return
@@ -108,29 +113,34 @@ func UsersWorker(pos int64, limit int, done chan bool) {
 			isBanned = 0
 		}
 		insertData := map[string]interface{}{
-			"id":           discuzUser.Uid,
-			"username":     discuzUser.Username,
-			"nickname":     "",
-			"password":     discuzUser.Password,
-			"url":          cutString(discuzUser.Site, 100),
-			"company":      "",
-			"location":     "",
-			"email":        discuzUser.Email,
-			"avatar":       "",
-			"info":         cutString(discuzUser.Bio, 255),
-			"weibo":        "",
-			"we_chat":      "",
-			"qq":           discuzUser.Qq,
-			"public_email": 0,
-			"followers":    0,
-			"following":    0,
-			"fav_topics":   0,
-			"is_admin":     0,
-			"is_active":    isActive,
-			"is_banned":    isBanned,
-			"salt":         discuzUser.Salt,
-			"created":      time.Unix(discuzUser.Regdate, 0),
-			"updated":      "0000-00-00 00:00:00"}
+			"id":               discuzUser.Uid,
+			"username":         discuzUser.Username,
+			"nickname":         "",
+			"password":         discuzUser.Password,
+			"url":              cutString(discuzUser.Site, 100),
+			"company":          "",
+			"location":         "",
+			"email":            discuzUser.Email,
+			"avatar":           "",
+			"info":             cutString(discuzUser.Bio, 255),
+			"weibo":            "",
+			"we_chat":          "",
+			"qq":               discuzUser.Qq,
+			"public_email":     0,
+			"followers":        0,
+			"following":        0,
+			"fav_topics":       0,
+			"topics":           discuzUser.Threads,
+			"comments":         (discuzUser.Posts - discuzUser.Threads),
+			"reputation":       discuzUser.Extcredits1,
+			"credits":          discuzUser.Extcredits8,
+			"excellent_topics": discuzUser.Digestposts,
+			"is_admin":         0,
+			"is_active":        isActive,
+			"is_banned":        isBanned,
+			"salt":             discuzUser.Salt,
+			"created":          time.Unix(discuzUser.Regdate, 0),
+			"updated":          "0000-00-00 00:00:00"}
 		if err := Map2InsertSql(conf.OrmGotalk, "user", insertData); err != nil {
 			fmt.Println(err)
 		}

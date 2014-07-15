@@ -111,10 +111,10 @@ type Comment struct {
 	Topic      *Topic    `orm:"rel(fk);index"`
 	ContentHex string    `orm:"size(24)"`
 	Content    *Content  `orm:"-"`
-	User       *User     `orm:"rel(fk)"`
+	User       *User     `orm:"rel(fk);index"`
 	Username   string    `orm:"size(30)`
 	Ip         string    `orm:"size(39)"`
-	Created    time.Time `orm:"auto_now_add"`
+	Created    time.Time `orm:"auto_now_add";index`
 	Updated    time.Time `orm:"auto_now"`
 }
 
@@ -136,6 +136,19 @@ func (m *Comment) Read(fields ...string) error {
 	if err := orm.NewOrm().Read(m, fields...); err != nil {
 		return err
 	}
+	if m.ContentHex != "" && m.ContentHex != "0" {
+		content := Content{}
+		m.Content = &content
+		m.Content.Id = bson.ObjectIdHex(m.ContentHex)
+		err := m.Content.Read()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *Comment) SyncContent() error {
 	if m.ContentHex != "" && m.ContentHex != "0" {
 		content := Content{}
 		m.Content = &content
@@ -228,6 +241,20 @@ func (m *Content) Delete() error {
 	err := c.RemoveId(m.Id)
 	return err
 }
+
+func initContentIndex() {
+	session := setting.MongodbSession.Clone()
+	c := session.DB(setting.MongodbName).C("Content")
+	index := mgo.Index{
+		Key:        []string{"_id", "firstname"},
+		Unique:     true,
+		DropDups:   true,
+		Background: true, // See notes.
+		Sparse:     true,
+	}
+	c.EnsureIndex(index)
+}
+
 func init() {
 	orm.RegisterModel(new(Topic), new(Comment))
 }

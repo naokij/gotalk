@@ -70,7 +70,10 @@ func (this *UserController) Profile() {
 	if err != nil {
 		this.Abort("404")
 	}
+
 	this.Data["TheUser"] = &user
+	this.Data["LatestTopics"] = user.LatestTopics(10)
+	this.Data["LatestComments"] = user.LatestComments(10)
 	return
 }
 
@@ -302,4 +305,20 @@ func (this *UserController) FollowUnfollow() {
 
 	this.Data["json"] = result
 	this.ServeJson()
+}
+
+func (this *UserController) List() {
+	this.Layout = "layout.html"
+	this.TplNames = "user_list.html"
+	this.Data["PageTitle"] = fmt.Sprintf("在线用户 | %s", setting.AppName)
+
+	var users []*models.User
+	orderBy := "-id"
+	limit := 50
+	page, _ := this.GetInt("p")
+	offset := int(page) * limit
+
+	qs := models.Users()
+	qs.OrderBy(orderBy).Limit(limit, offset).All(&users)
+	this.Data["users"] = users
 }

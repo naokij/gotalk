@@ -1,4 +1,4 @@
-<div class="col-md-3">
+<div class="col-md-5">
 	<div class="text-center panel panel-default">
 		<div class="panel-body">
 			<img src="{{.TheUser.LargeAvatarUrl}}" class="avatar"></img>
@@ -31,8 +31,8 @@
 					<tr>
 						<td><strong>{{.TheUser.Followers}}</strong></strong></td>
 						<td><strong>{{.TheUser.Following}}</strong></td>
-						<td><strong>1500</strong></td>
-						<td><strong>15000</strong></td>
+						<td><strong>{{.TheUser.Topics}}</strong></td>
+						<td><strong>{{.TheUser.Comments}}</strong></td>
 					</tr>
 						<td>粉丝</td>
 						<td>关注</td>
@@ -57,14 +57,22 @@
 		</div>
 	</div>
 </div>
-<div class="col-md-6">
+<div class="col-md-7">
 	<div class="panel panel-default">
 		<div class="panel-heading">最近帖子</div>
-		<div class="panel-body"></div>
+		<div class="panel-body">
+			{{range .LatestTopics}}
+				<li><a href="">{{.Title}}</a></li>
+			{{end}}
+		</div>
 	</div>
 	<div class="panel panel-default">
 		<div class="panel-heading">最近回帖</div>
-		<div class="panel-body"></div>
+		<div class="panel-body">
+			{{range .LatestComments}}
+				<li>{{.Content.Message}}</li>
+			{{end}}
+		</div>
 	</div>
 </div>
 <script>
