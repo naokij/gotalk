@@ -23,6 +23,8 @@ import (
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	"reflect"
 )
 
 var (
@@ -81,4 +83,18 @@ func EncodeMd5(str string) string {
 	m := md5.New()
 	m.Write([]byte(str))
 	return hex.EncodeToString(m.Sum(nil))
+}
+
+// convert any numeric value to int64
+func ToInt64(value interface{}) (d int64, err error) {
+	val := reflect.ValueOf(value)
+	switch value.(type) {
+	case int, int8, int16, int32, int64:
+		d = val.Int()
+	case uint, uint8, uint16, uint32, uint64:
+		d = int64(val.Uint())
+	default:
+		err = fmt.Errorf("ToInt64 need numeric not `%T`", value)
+	}
+	return
 }

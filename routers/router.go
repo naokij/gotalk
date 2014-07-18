@@ -33,9 +33,14 @@ func init() {
 	beego.Router("/register/connect", socialAuthController, "get:Connect;post:Connect")
 
 	userController := new(controllers.UserController)
-	beego.Router("/user/:username:string/edit", userController, "get:Edit;post:Edit")
-	beego.Router("/user/:username:string/resend-validation", userController, "get:ResendValidation")
-	beego.Router("/user/:username:string", userController, "get:Profile")
+	beego.Router("/user/:username(.+)/edit", userController, "get:Edit;post:Edit")
+	beego.Router("/user/:username(.+)/resend-validation", userController, "get:ResendValidation")
+	beego.Router("/user/:username(.+)", userController, "get:Profile")
 	beego.Router("/user-followunfollow", userController, "post:FollowUnfollow")
-	beego.Router("/users", userController, "get:List")
+	beego.Router("/users", userController, "get:ListById")
+	beego.Router("/users/by-rep", userController, "get:ListByRep")
+	beego.Router("/users/by-digests", userController, "get:ListByDigests")
+	beego.Router("/users/by-topics", userController, "get:ListByTopics")
+	beego.Router("/users/by-comments", userController, "get:ListByComments")
+	beego.Router("/users/by-followers", userController, "get:ListByFollowers")
 }

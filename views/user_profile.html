@@ -70,7 +70,7 @@
 		<div class="panel-heading">最近回帖</div>
 		<div class="panel-body">
 			{{range .LatestComments}}
-				<li>{{.Content.Message}}</li>
+				<li>{{.Topic.Title}} - {{.Content.Message}}</li>
 			{{end}}
 		</div>
 	</div>

@@ -307,18 +307,53 @@ func (this *UserController) FollowUnfollow() {
 	this.ServeJson()
 }
 
-func (this *UserController) List() {
+func (this *UserController) List(orderBy string) {
 	this.Layout = "layout.html"
 	this.TplNames = "user_list.html"
-	this.Data["PageTitle"] = fmt.Sprintf("在线用户 | %s", setting.AppName)
 
 	var users []*models.User
-	orderBy := "-id"
+
 	limit := 50
-	page, _ := this.GetInt("p")
-	offset := int(page) * limit
+	total, _ := models.Users().Count()
+
+	pagenator := this.SetPaginator(limit, total)
 
 	qs := models.Users()
-	qs.OrderBy(orderBy).Limit(limit, offset).All(&users)
+	qs.OrderBy(orderBy).Limit(limit, pagenator.Offset()).All(&users)
 	this.Data["users"] = users
+}
+
+func (this *UserController) ListById() {
+	this.Data["PageTitle"] = fmt.Sprintf("新用户 | %s", setting.AppName)
+	this.Data["SubNav1"] = true
+	this.List("-id")
+}
+func (this *UserController) ListByRep() {
+	this.Data["PageTitle"] = fmt.Sprintf("威望排名 | %s", setting.AppName)
+	this.Data["SubNav2"] = true
+	this.List("-reputation")
+}
+
+func (this *UserController) ListByDigests() {
+	this.Data["PageTitle"] = fmt.Sprintf("精华排名 | %s", setting.AppName)
+	this.Data["SubNav3"] = true
+	this.List("-excellent_topics")
+}
+
+func (this *UserController) ListByTopics() {
+	this.Data["PageTitle"] = fmt.Sprintf("发帖排名 | %s", setting.AppName)
+	this.Data["SubNav4"] = true
+	this.List("-topics")
+}
+
+func (this *UserController) ListByComments() {
+	this.Data["PageTitle"] = fmt.Sprintf("回复排名 | %s", setting.AppName)
+	this.Data["SubNav5"] = true
+	this.List("-comments")
+}
+
+func (this *UserController) ListByFollowers() {
+	this.Data["PageTitle"] = fmt.Sprintf("粉丝排名 | %s", setting.AppName)
+	this.Data["SubNav6"] = true
+	this.List("-followers")
 }

@@ -54,6 +54,12 @@ body {
   border-top-color: #2f78ed;
 }
 
+/* 二级导航 */
+.subnav .nav > li > a{
+  padding: 5px 10px;
+}
+
+
 /* 错误信息 */
 .has-error .form-control {
     background-color: #000;
@@ -142,7 +148,7 @@ label.suggest{
     margin-top: 20px;
     text-align: center;
     vertical-align: top;
-    width: 104px;
+    width: 188px;
 }
 .users .users-box .avatar{
     background-color: #fff;

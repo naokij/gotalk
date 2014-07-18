@@ -303,7 +303,7 @@ func (m *User) LatestTopics(count int) []*Topic {
 
 func (m *User) LatestComments(count int) []*Comment {
 	var comments []*Comment
-	qs := orm.NewOrm().QueryTable("comment")
+	qs := orm.NewOrm().QueryTable("comment").RelatedSel("topic")
 	qs.Filter("user_id", m.Id).OrderBy("-created").Limit(count).All(&comments)
 	for k, _ := range comments {
 		comments[k].SyncContent()

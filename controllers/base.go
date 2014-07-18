@@ -206,3 +206,9 @@ func (this *BaseController) checkDeny() {
 		return
 	}
 }
+
+func (this *BaseController) SetPaginator(per int, nums int64) *utils.Paginator {
+	p := utils.NewPaginator(this.Ctx.Request, per, nums)
+	this.Data["paginator"] = p
+	return p
+}

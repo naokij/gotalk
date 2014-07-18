@@ -1,13 +1,15 @@
-<div class="users">
-	<ul class="nav nav-pills">
-		<li class="active"><a href="/users">新用户</a></li>
-		<li class=""><a href="/users/by-rep">威望排名</a></li>
-		<li class=""><a href="/users/by-digest">精华排名</a></li>
-		<li class=""><a href="/users/by-topics">话题排名</a></li>
-		<li class=""><a href="/users/by-posts">发帖排名</a></li>
-		<li class=""><a href="/users/by-followers">粉丝排名</a></li>
-		<li class=""><a href="/users/search">搜索</a></li>
+<div class="panel panel-info users">
+	<div class="panel-heading">
+	<ul class="subnav nav nav-pills">
+		<li class="{{if .SubNav1}}active{{end}}"><a href="/users">新用户</a></li>
+		<li class="{{if .SubNav2}}active{{end}}"><a href="/users/by-rep">威望排名</a></li>
+		<li class="{{if .SubNav3}}active{{end}}"><a href="/users/by-digests">精华排名</a></li>
+		<li class="{{if .SubNav4}}active{{end}}"><a href="/users/by-topics">发帖排名</a></li>
+		<li class="{{if .SubNav5}}active{{end}}"><a href="/users/by-comments">回复排名</a></li>
+		<li class="{{if .SubNav6}}active{{end}}"><a href="/users/by-followers">粉丝排名</a></li>
+		<li class="{{if .SubNav7}}active{{end}}"><a href="/users/search">搜索</a></li>
 	</ul>
+	</div>
 	<br>
 	<ul class="users-container" class="users-container">
 		{{range .users}}
@@ -20,4 +22,7 @@
 		</li>
 		{{end}}	
 	</ul>
+	<div class="cell last low">
+		{{template "paginator.html" .}}
+	</div>
 </div>
